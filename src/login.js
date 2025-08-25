@@ -9,6 +9,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth } from "./firebase";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -16,6 +17,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isSignup, setIsSignup] = useState(false);
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -35,6 +37,7 @@ const Login = () => {
         await signInWithEmailAndPassword(auth, email, password);
         alert("Login successful! 🎉");
       }
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err.message);
     }
@@ -45,6 +48,7 @@ const Login = () => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err.message);
     }
@@ -59,15 +63,7 @@ const Login = () => {
   };
 
   if (user) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 80 }}>
-        <h2>Welcome{user.displayName ? `, ${user.displayName}` : "!"}</h2>
-        <p style={{ marginTop: 8 }}>Signed in as {user.email || "Google user"}</p>
-        <button onClick={handleSignOut} style={{ marginTop: 16, padding: 8, background: "#9c27b0", color: "white", border: "none" }}>
-          Sign Out
-        </button>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
   return (

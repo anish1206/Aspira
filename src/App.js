@@ -1,8 +1,14 @@
 // src/App.js
 import React from "react";
-import { Routes, Route, Navigate, Link } from "react-router-dom";
+import { Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import Login from "./login";
 import { useAuth } from "./auth";
+import Dashboard from "./pages/Dashboard";
+import Chat from "./pages/Chat";
+import Groups from "./pages/Groups";
+import Checkins from "./pages/Checkins";
+import Diary from "./pages/Diary";
+import Settings from "./pages/Settings";
 
 const Nav = () => {
   const { user, signOutUser } = useAuth();
@@ -39,58 +45,17 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  const location = useLocation();
   return (
     <div>
-      <Nav />
+      {location.pathname !== "/login" && <Nav />}
       <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Page title="Dashboard" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/chat"
-          element={
-            <ProtectedRoute>
-              <Page title="Chat" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/groups"
-          element={
-            <ProtectedRoute>
-              <Page title="Groups" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/checkins"
-          element={
-            <ProtectedRoute>
-              <Page title="Check-ins" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/diary"
-          element={
-            <ProtectedRoute>
-              <Page title="Diary" />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Page title="Settings" />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+        <Route path="/groups" element={<ProtectedRoute><Groups /></ProtectedRoute>} />
+        <Route path="/checkins" element={<ProtectedRoute><Checkins /></ProtectedRoute>} />
+        <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
