@@ -1,5 +1,8 @@
+/* Mobile-first responsive design for Mindsync */
 .App {
   text-align: center;
+  min-height: 100vh;
+  background-color: #f8f9fa;
 }
 
 .App-logo {
@@ -15,17 +18,155 @@
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  padding: 20px;
   color: white;
 }
 
 .App-link {
   color: #61dafb;
+}
+
+/* Mobile Navigation Styles */
+@media (max-width: 768px) {
+  nav {
+    flex-wrap: wrap !important;
+    padding: 8px !important;
+  }
+  
+  nav a {
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  nav a:hover {
+    background-color: rgba(25, 118, 210, 0.1);
+  }
+}
+
+/* Mobile Grid Layouts */
+@media (max-width: 768px) {
+  div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+  
+  div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Mobile Card Styles */
+@media (max-width: 768px) {
+  .hover-card {
+    margin-bottom: 12px;
+  }
+  
+  .hover-card:hover {
+    transform: none !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  }
+}
+
+/* Mobile Form Styles */
+@media (max-width: 768px) {
+  textarea, input[type="text"], input[type="email"], select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  button {
+    min-height: 44px; /* Touch target size */
+    font-size: 14px !important;
+  }
+}
+
+/* Mobile Chat Styles */
+@media (max-width: 768px) {
+  div[style*="height: '70vh'"] {
+    height: 60vh !important;
+  }
+  
+  div[style*="maxWidth: '70%'"] {
+    max-width: 85% !important;
+  }
+}
+
+/* Mobile Dashboard Adjustments */
+@media (max-width: 768px) {
+  div[style*="padding: 20"] {
+    padding: 12px !important;
+  }
+  
+  h2 {
+    font-size: 24px !important;
+  }
+  
+  h3 {
+    font-size: 20px !important;
+  }
+}
+
+/* Mobile Modal Styles */
+@media (max-width: 768px) {
+  div[style*="position: fixed"] {
+    padding: 10px !important;
+  }
+  
+  div[style*="maxWidth: '80%'"] {
+    max-width: 95% !important;
+    max-height: 90% !important;
+  }
+}
+
+/* Accessibility Improvements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus styles for accessibility */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border-color: #000 !important;
+  }
+  
+  button {
+    border: 2px solid #000 !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode support (if implemented) */
+@media (prefers-color-scheme: dark) {
+  .App {
+    background-color: #121212;
+    color: #ffffff;
+  }
 }
 
 @keyframes App-logo-spin {
@@ -34,5 +175,90 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Notification Preferences Styles */
+.notification-preferences-card {
+  margin-bottom: 16px;
+}
+
+.notification-toggle-container {
+  display: grid;
+  gap: 16px;
+}
+
+.notification-toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.notification-toggle-item:last-child {
+  border-bottom: none;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.notification-info {
+  padding-top: 16px;
+}
+
+/* Mobile responsive adjustments for notification preferences */
+@media (max-width: 768px) {
+  .notification-toggle-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .notification-toggle-item .ant-switch {
+    align-self: flex-end;
+  }
+  
+  .notification-actions {
+    flex-direction: column;
+  }
+  
+  .notification-actions button {
+    width: 100%;
+  }
+}
+
+/* Mobile-specific utility classes */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .mobile-stack {
+    flex-direction: column !important;
+  }
+  
+  .mobile-center {
+    text-align: center !important;
+  }
+}
+
+/* Enhanced dark mode support for notifications */
+@media (prefers-color-scheme: dark) {
+  .notification-toggle-item {
+    border-bottom-color: #333;
+  }
+  
+  .App {
+    background-color: #121212;
+    color: #ffffff;
   }
 }

@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "groups": {
+      "$groupId": {
+        "members": {
+          "$userId": {
+            ".read": "auth != null && auth.uid == $userId",
+            ".write": "auth != null && auth.uid == $userId"
+          }
+        },
+        "messages": {
+          "$messageId": {
+            ".read": "auth != null && root.child('groups').child($groupId).child('members').child(auth.uid).exists()",
+            ".write": "auth != null && auth.uid == data.child('userId').val() && root.child('groups').child($groupId).child('members').child(auth.uid).exists()"
+          }
+        },
+        "info": {
+          ".read": "auth != null",
+          ".write": false
+        }
+      }
+    }
+  }
+}
