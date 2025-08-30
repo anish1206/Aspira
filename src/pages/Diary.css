@@ -590,6 +590,207 @@
   transform: translateY(-2px);
 }
 
+/* Drawing Tools */
+.drawing-tools {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  border: 2px solid #e9ecef;
+}
+
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.tool-group:last-child {
+  margin-bottom: 0;
+}
+
+.tool-button {
+  padding: 8px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 20px;
+  background: white;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tool-button:hover {
+  border-color: #667eea;
+  background: #f0f4ff;
+}
+
+.tool-button.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.current-mode {
+  color: #6c757d;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  background: #e9ecef;
+  border-radius: 15px;
+  border: 1px solid #dee2e6;
+}
+
+.brush-slider {
+  width: 100px;
+  height: 6px;
+  border-radius: 3px;
+  background: #e9ecef;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.brush-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+}
+
+.brush-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #667eea;
+  cursor: pointer;
+  border: none;
+}
+
+.color-picker {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: none;
+}
+
+.clear-button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-button:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+}
+
+/* Canvas Container */
+.canvas-container {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.drawing-canvas {
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  background: white;
+  cursor: crosshair;
+  max-width: 100%;
+  height: 300px;
+}
+
+/* Text Input Modal */
+.text-input-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.text-input-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  min-width: 300px;
+}
+
+.text-input-field {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.text-input-field:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.text-input-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+}
+
+.add-text-button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-text-button:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+/* Entry Images */
+.entry-image {
+  margin: 15px 0;
+  text-align: center;
+}
+
+.diary-drawing {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 /* Loading Spinner */
 .loading-spinner {
   display: flex;
@@ -625,6 +826,33 @@
 @media (max-width: 768px) {
   .diary-container {
     padding: 15px;
+  }
+  
+  .drawing-tools {
+    padding: 15px;
+  }
+  
+  .tool-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .tool-button {
+    text-align: center;
+  }
+  
+  .canvas-container {
+    padding: 15px;
+  }
+  
+  .drawing-canvas {
+    height: 250px;
+  }
+  
+  .text-input-content {
+    margin: 20px;
+    min-width: auto;
   }
   
   .diary-header {

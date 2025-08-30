@@ -1,5 +1,5 @@
 // src/pages/Diary.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../auth";
 import { db } from "../firebase";
 import { 
@@ -32,6 +32,75 @@ export default function Diary() {
   const [journalEntries, setJournalEntries] = useState([]);
   const [showGratitudeForm, setShowGratitudeForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  // Drawing canvas states
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawingMode, setDrawingMode] = useState("draw"); // "draw", "text", "eraser"
+  const [brushSize, setBrushSize] = useState(3);
+  const [brushColor, setBrushColor] = useState("#000000");
+  const [textInput, setTextInput] = useState("");
+  const [showTextInput, setShowTextInput] = useState(false);
+  const [textPosition, setTextPosition] = useState({ x: 0, y: 0 });
+  const [canvasInitialized, setCanvasInitialized] = useState(false);
+  
+  const canvasRef = useRef(null);
+  const contextRef = useRef(null);
+
+  // Initialize canvas - improved version
+  const initializeCanvas = useCallback(() => {
+    if (!canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    
+    // Set actual size in memory (scaled to account for extra pixel density)
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
+    
+    // Scale it back down using CSS
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+
+    const context = canvas.getContext("2d");
+    context.scale(2, 2);
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.strokeStyle = brushColor;
+    context.lineWidth = brushSize;
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    contextRef.current = context;
+    setCanvasInitialized(true);
+  }, [brushColor, brushSize]);
+
+  // Initialize canvas when tab changes to journal
+  useEffect(() => {
+    if (activeTab === "journal") {
+      // Small delay to ensure canvas is rendered
+      const timer = setTimeout(() => {
+        initializeCanvas();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setCanvasInitialized(false);
+    }
+  }, [activeTab, initializeCanvas]);
+
+  // Update context when brush properties change - with null checks
+  useEffect(() => {
+    if (contextRef.current && canvasInitialized) {
+      if (drawingMode === "eraser") {
+        contextRef.current.globalCompositeOperation = "destination-out";
+        contextRef.current.lineWidth = brushSize * 2;
+      } else {
+        contextRef.current.globalCompositeOperation = "source-over";
+        contextRef.current.strokeStyle = brushColor;
+        contextRef.current.lineWidth = brushSize;
+      }
+    }
+  }, [brushColor, brushSize, drawingMode, canvasInitialized]);
 
   // Load data from Firebase on component mount
   useEffect(() => {
@@ -104,51 +173,164 @@ export default function Diary() {
     };
   }, [user]);
 
-  const createDefaultIntentions = async () => {
+  // Drawing functions with improved error handling
+  const startDrawing = ({ nativeEvent }) => {
+    if (!contextRef.current || !canvasInitialized) {
+      console.warn("Canvas not initialized");
+      return;
+    }
+    
+    if (drawingMode !== "draw" && drawingMode !== "eraser") return;
+    
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = (nativeEvent.clientX - rect.left);
+    const y = (nativeEvent.clientY - rect.top);
+    
+    contextRef.current.beginPath();
+    contextRef.current.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = ({ nativeEvent }) => {
+    if (!isDrawing || !contextRef.current || !canvasInitialized) return;
+    if (drawingMode !== "draw" && drawingMode !== "eraser") return;
+    
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = (nativeEvent.clientX - rect.left);
+    const y = (nativeEvent.clientY - rect.top);
+    
+    contextRef.current.lineTo(x, y);
+    contextRef.current.stroke();
+  };
+
+  const finishDrawing = () => {
+    if (contextRef.current && isDrawing) {
+      contextRef.current.closePath();
+    }
+    setIsDrawing(false);
+  };
+
+  const addText = ({ nativeEvent }) => {
+    if (!contextRef.current || !canvasInitialized) {
+      console.warn("Canvas not initialized");
+      return;
+    }
+    
+    if (drawingMode !== "text") return;
+    
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = (nativeEvent.clientX - rect.left);
+    const y = (nativeEvent.clientY - rect.top);
+    
+    setTextPosition({ x, y });
+    setShowTextInput(true);
+  };
+
+  const handleTextSubmit = () => {
+    if (textInput.trim() && contextRef.current && canvasInitialized) {
+      contextRef.current.font = "16px Arial";
+      contextRef.current.fillStyle = brushColor;
+      contextRef.current.fillText(textInput, textPosition.x, textPosition.y);
+      setTextInput("");
+      setShowTextInput(false);
+    }
+  };
+
+  const clearCanvas = () => {
+    if (contextRef.current && canvasRef.current && canvasInitialized) {
+      const canvas = canvasRef.current;
+      contextRef.current.clearRect(0, 0, canvas.width / 2, canvas.height / 2);
+      // Refill with white background
+      contextRef.current.fillStyle = "#ffffff";
+      contextRef.current.fillRect(0, 0, canvas.width / 2, canvas.height / 2);
+    }
+  };
+
+  const resetCanvasContext = () => {
+    if (!contextRef.current || !canvasInitialized) return;
+    
+    if (drawingMode === "eraser") {
+      contextRef.current.globalCompositeOperation = "destination-out";
+      contextRef.current.lineWidth = brushSize * 2;
+    } else {
+      contextRef.current.globalCompositeOperation = "source-over";
+      contextRef.current.strokeStyle = brushColor;
+      contextRef.current.lineWidth = brushSize;
+    }
+  };
+
+  const saveCanvasAsImage = () => {
+    if (canvasRef.current && canvasInitialized) {
+      return canvasRef.current.toDataURL("image/png");
+    }
+    return null;
+  };
+
+  const createDefaultIntentions = useCallback(async () => {
+    if (!user?.uid) return;
+    
     const defaultIntentions = [
       { text: "Be kind to myself", completed: false },
       { text: "Take a mindful break", completed: false },
       { text: "Practice gratitude", completed: false }
     ];
 
-    for (const intention of defaultIntentions) {
-      await addDoc(collection(db, "intentions"), {
-        ...intention,
-        userId: user.uid,
-        date: new Date().toDateString(),
-        timestamp: serverTimestamp()
-      });
+    try {
+      for (const intention of defaultIntentions) {
+        await addDoc(collection(db, "intentions"), {
+          ...intention,
+          userId: user.uid,
+          date: new Date().toDateString(),
+          timestamp: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error("Error creating default intentions:", error);
     }
-  };
+  }, [user?.uid]);
 
-  const createDefaultTasks = async () => {
+  const createDefaultTasks = useCallback(async () => {
+    if (!user?.uid) return;
+    
     const defaultTasks = [
       { text: "Morning meditation", category: "Self-Care", completed: false },
       { text: "Complete work project", category: "Work", completed: false },
       { text: "Do laundry", category: "Chores", completed: false }
     ];
 
-    for (const task of defaultTasks) {
-      await addDoc(collection(db, "tasks"), {
-        ...task,
-        userId: user.uid,
-        date: new Date().toDateString(),
-        timestamp: serverTimestamp()
-      });
+    try {
+      for (const task of defaultTasks) {
+        await addDoc(collection(db, "tasks"), {
+          ...task,
+          userId: user.uid,
+          date: new Date().toDateString(),
+          timestamp: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error("Error creating default tasks:", error);
     }
-  };
+  }, [user?.uid]);
 
   const saveJournalEntry = async () => {
-    if (journalEntry.trim()) {
+    if (!user?.uid) return;
+    
+    if (journalEntry.trim() || hasCanvasContent()) {
       try {
+        const canvasImage = saveCanvasAsImage();
         await addDoc(collection(db, "diaryEntries"), {
           content: journalEntry,
+          canvasImage: canvasImage,
           userId: user.uid,
           date: new Date().toDateString(),
           timestamp: serverTimestamp(),
           type: "freeform"
         });
         setJournalEntry("");
+        clearCanvas();
       } catch (error) {
         console.error("Error saving journal entry:", error);
         alert("Failed to save entry. Please try again.");
@@ -156,7 +338,29 @@ export default function Diary() {
     }
   };
 
+  const hasCanvasContent = () => {
+    if (!canvasRef.current || !canvasInitialized) return false;
+    
+    try {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      // Check if any pixel has non-transparent content
+      for (let i = 3; i < data.length; i += 4) {
+        if (data[i] > 0) return true; // Alpha channel > 0
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking canvas content:", error);
+      return false;
+    }
+  };
+
   const saveGratitudeEntry = async () => {
+    if (!user?.uid) return;
+    
     if (gratitudeAnswers.smallJoy && gratitudeAnswers.thankfulPerson && gratitudeAnswers.positiveMoment) {
       try {
         await addDoc(collection(db, "diaryEntries"), {
@@ -179,9 +383,11 @@ export default function Diary() {
     try {
       const intentionRef = doc(db, "intentions", id);
       const intention = intentions.find(i => i.id === id);
-      await updateDoc(intentionRef, {
-        completed: !intention.completed
-      });
+      if (intention) {
+        await updateDoc(intentionRef, {
+          completed: !intention.completed
+        });
+      }
     } catch (error) {
       console.error("Error updating intention:", error);
       alert("Failed to update intention. Please try again.");
@@ -190,7 +396,7 @@ export default function Diary() {
 
   const addIntention = async () => {
     const text = prompt("Enter your intention:");
-    if (text) {
+    if (text && user?.uid) {
       try {
         await addDoc(collection(db, "intentions"), {
           text,
@@ -207,7 +413,7 @@ export default function Diary() {
   };
 
   const addTask = async () => {
-    if (newTask.trim()) {
+    if (newTask.trim() && user?.uid) {
       try {
         await addDoc(collection(db, "tasks"), {
           text: newTask,
@@ -229,9 +435,11 @@ export default function Diary() {
     try {
       const taskRef = doc(db, "tasks", id);
       const task = tasks.find(t => t.id === id);
-      await updateDoc(taskRef, {
-        completed: !task.completed
-      });
+      if (task) {
+        await updateDoc(taskRef, {
+          completed: !task.completed
+        });
+      }
     } catch (error) {
       console.error("Error updating task:", error);
       alert("Failed to update task. Please try again.");
@@ -276,6 +484,49 @@ export default function Diary() {
       month: 'long', 
       day: 'numeric' 
     });
+  };
+
+  // Handle touch events properly
+  const handleTouchStart = (e) => {
+    e.preventDefault();
+    if (!canvasInitialized) return;
+    
+    const touch = e.touches[0];
+    const mouseEvent = {
+      nativeEvent: {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      }
+    };
+    
+    if (drawingMode === "text") {
+      addText(mouseEvent);
+    } else {
+      startDrawing(mouseEvent);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    if (!canvasInitialized || !isDrawing) return;
+    
+    if (drawingMode === "draw" || drawingMode === "eraser") {
+      const touch = e.touches[0];
+      const mouseEvent = {
+        nativeEvent: {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        }
+      };
+      draw(mouseEvent);
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    e.preventDefault();
+    if (drawingMode === "draw" || drawingMode === "eraser") {
+      finishDrawing();
+    }
   };
 
   if (loading) {
@@ -328,13 +579,141 @@ export default function Diary() {
         <div className="tab-content">
           <div className="journal-section">
             <h3>Today's Thoughts</h3>
+            
+            {/* Drawing Tools */}
+            <div className="drawing-tools">
+              <div className="tool-group">
+                <button 
+                  className={`tool-button ${drawingMode === "draw" ? "active" : ""}`}
+                  onClick={() => {
+                    setDrawingMode("draw");
+                    resetCanvasContext();
+                  }}
+                >
+                  ✏️ Draw
+                </button>
+                <button 
+                  className={`tool-button ${drawingMode === "text" ? "active" : ""}`}
+                  onClick={() => {
+                    setDrawingMode("text");
+                    resetCanvasContext();
+                  }}
+                >
+                  🔤 Text
+                </button>
+                <button 
+                  className={`tool-button ${drawingMode === "eraser" ? "active" : ""}`}
+                  onClick={() => {
+                    setDrawingMode("eraser");
+                    resetCanvasContext();
+                  }}
+                >
+                  🧽 Eraser
+                </button>
+              </div>
+              
+              <div className="tool-group">
+                <span className="current-mode">
+                  Current Mode: <strong>{drawingMode === "draw" ? "Drawing" : drawingMode === "text" ? "Adding Text" : "Erasing"}</strong>
+                </span>
+              </div>
+              
+              <div className="tool-group">
+                <label>Brush Size:</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="20"
+                  value={brushSize}
+                  onChange={(e) => {
+                    setBrushSize(parseInt(e.target.value));
+                    resetCanvasContext();
+                  }}
+                  className="brush-slider"
+                />
+                <span>{brushSize}px</span>
+              </div>
+              
+              <div className="tool-group">
+                <label>Color:</label>
+                <input
+                  type="color"
+                  value={brushColor}
+                  onChange={(e) => {
+                    setBrushColor(e.target.value);
+                    resetCanvasContext();
+                  }}
+                  className="color-picker"
+                />
+              </div>
+              
+              <button onClick={clearCanvas} className="clear-button">
+                🗑️ Clear Canvas
+              </button>
+            </div>
+
+            {/* Drawing Canvas */}
+            <div className="canvas-container">
+              {!canvasInitialized && (
+                <div className="canvas-loading">
+                  <p>Initializing canvas...</p>
+                </div>
+              )}
+              <canvas
+                ref={canvasRef}
+                onMouseDown={drawingMode === "text" ? addText : startDrawing}
+                onMouseMove={drawingMode === "draw" || drawingMode === "eraser" ? draw : undefined}
+                onMouseUp={drawingMode === "draw" || drawingMode === "eraser" ? finishDrawing : undefined}
+                onMouseLeave={drawingMode === "draw" || drawingMode === "eraser" ? finishDrawing : undefined}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                className="drawing-canvas"
+                style={{ 
+                  cursor: drawingMode === "text" ? "text" : "crosshair",
+                  opacity: canvasInitialized ? 1 : 0.5
+                }}
+              />
+            </div>
+
+            {/* Text Input Modal */}
+            {showTextInput && (
+              <div className="text-input-modal">
+                <div className="text-input-content">
+                  <input
+                    type="text"
+                    value={textInput}
+                    onChange={(e) => setTextInput(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleTextSubmit();
+                      }
+                    }}
+                    placeholder="Enter your text..."
+                    className="text-input-field"
+                    autoFocus
+                  />
+                  <div className="text-input-actions">
+                    <button onClick={handleTextSubmit} className="add-text-button">
+                      Add Text
+                    </button>
+                    <button onClick={() => setShowTextInput(false)} className="cancel-button">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Text Entry */}
             <textarea
               value={journalEntry}
               onChange={(e) => setJournalEntry(e.target.value)}
               placeholder="Write your thoughts, feelings, and experiences here..."
-              rows={8}
+              rows={6}
               className="journal-textarea"
             />
+            
             <button onClick={saveJournalEntry} className="save-button">
               Save Entry
             </button>
@@ -352,6 +731,11 @@ export default function Diary() {
                       <span className="entry-date">{entry.date}</span>
                       <span className="entry-type">{entry.type === "gratitude" ? "🙏 Gratitude" : "📝 Journal"}</span>
                     </div>
+                    {entry.canvasImage && (
+                      <div className="entry-image">
+                        <img src={entry.canvasImage} alt="Diary drawing" className="diary-drawing" />
+                      </div>
+                    )}
                     <div className="entry-content">{entry.content}</div>
                   </div>
                 ))}
