@@ -31,6 +31,7 @@ export default function Settings() {
             Allow data processing for improving support (you can change anytime)
           </label>
         </div>
+        
       </div>
     </div>
   );

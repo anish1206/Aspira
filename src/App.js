@@ -11,23 +11,33 @@ import Diary from "./pages/Diary";
 import Settings from "./pages/Settings";
 
 const Nav = () => {
-  const { user, signOutUser } = useAuth();
+  const { user } = useAuth();
   return (
     <nav style={{ display: "flex", gap: 12, padding: 12, borderBottom: "1px solid #eee" }}>
       <Link to="/">Dashboard</Link>
       <Link to="/chat">Chat</Link>
       <Link to="/groups">Groups</Link>
-      <Link to="/checkins">Check-ins</Link>
+      <Link to="/checkins">Mentors</Link>
       <Link to="/diary">Diary</Link>
       <Link to="/settings">Settings</Link>
       <div style={{ marginLeft: "auto" }}>
-        {user ? (
-          <button onClick={signOutUser} style={{ padding: 6 }}>Sign Out</button>
-        ) : (
-          <Link to="/login">Login</Link>
-        )}
+        {!user && <Link to="/login">Login</Link>}
       </div>
     </nav>
+  );
+};
+// Wrapper to show Sign Out button only in Settings page
+const SettingsWithSignOut = () => {
+  const { user, signOutUser } = useAuth();
+  return (
+    <div>
+      <Settings />
+      {user && (
+        <div style={{ marginTop: 24 }}>
+          <button onClick={signOutUser} style={{ padding: 6 }}>Sign Out</button>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -55,7 +65,7 @@ function App() {
         <Route path="/groups" element={<ProtectedRoute><Groups /></ProtectedRoute>} />
         <Route path="/checkins" element={<ProtectedRoute><Checkins /></ProtectedRoute>} />
         <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><SettingsWithSignOut /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
