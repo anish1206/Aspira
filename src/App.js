@@ -13,15 +13,15 @@ import Settings from "./pages/Settings";
 const Nav = () => {
   const { user } = useAuth();
   return (
-    <nav style={{ display: "flex", gap: 12, padding: 12, borderBottom: "1px solid #eee" }}>
-      <Link to="/">Dashboard</Link>
-      <Link to="/chat">Chat</Link>
-      <Link to="/groups">Groups</Link>
-      <Link to="/checkins">Mentors</Link>
-      <Link to="/diary">Diary</Link>
-      <Link to="/settings">Settings</Link>
-      <div style={{ marginLeft: "auto" }}>
-        {!user && <Link to="/login">Login</Link>}
+    <nav className="flex gap-3 p-3 border-b border-gray-200 bg-white shadow-sm">
+      <Link to="/" className="text-blue-600 hover:text-blue-800 font-medium">Dashboard</Link>
+      <Link to="/chat" className="text-blue-600 hover:text-blue-800 font-medium">Chat</Link>
+      <Link to="/groups" className="text-blue-600 hover:text-blue-800 font-medium">Groups</Link>
+      <Link to="/checkins" className="text-blue-600 hover:text-blue-800 font-medium">Mentors</Link>
+      <Link to="/diary" className="text-blue-600 hover:text-blue-800 font-medium">Diary</Link>
+      <Link to="/settings" className="text-blue-600 hover:text-blue-800 font-medium">Settings</Link>
+      <div className="ml-auto">
+        {!user && <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">Login</Link>}
       </div>
     </nav>
   );
@@ -33,8 +33,13 @@ const SettingsWithSignOut = () => {
     <div>
       <Settings />
       {user && (
-        <div style={{ marginTop: 24 }}>
-          <button onClick={signOutUser} style={{ padding: 6 }}>Sign Out</button>
+        <div className="mt-6">
+          <button 
+            onClick={signOutUser} 
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+          >
+            Sign Out
+          </button>
         </div>
       )}
     </div>
@@ -42,22 +47,22 @@ const SettingsWithSignOut = () => {
 };
 
 const Page = ({ title }) => (
-  <div style={{ padding: 20 }}>
-    <h2>{title}</h2>
-    <p>Coming soon...</p>
+  <div className="p-5">
+    <h2 className="text-2xl font-bold text-gray-800 mb-4">{title}</h2>
+    <p className="text-gray-600">Coming soon...</p>
   </div>
 );
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div style={{ padding: 20 }}>Loading...</div>;
+  if (loading) return <div className="p-5 text-gray-600">Loading...</div>;
   return user ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
   const location = useLocation();
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       {location.pathname !== "/login" && <Nav />}
       <Routes>
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
