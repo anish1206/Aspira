@@ -47,7 +47,7 @@ class DataService {
         updatedAt: serverTimestamp()
       };
       
-      await updateDoc(doc(db, 'users', userId), encryptedProfile);
+      await setDoc(doc(db, 'users', userId), encryptedProfile, { merge: true });
       return true;
     } catch (error) {
       console.error('Error creating user profile:', error);

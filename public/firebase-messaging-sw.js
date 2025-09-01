@@ -6,12 +6,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-comp
 
 // Initialize Firebase in the service worker
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "mindsync-wellness.firebaseapp.com",
-  projectId: "mindsync-wellness",
-  storageBucket: "mindsync-wellness.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef123456789"
+  apiKey: 
+AIzaSyAbcxiltgXPDR_mNgt26dBuVxzC5z4T2Wc,
+  authDomain: "mindsync2-37bc8.firebaseapp.com",
+  projectId: "mindsync2-37bc8",
+  storageBucket: "mindsync2-37bc8.firebasestorage.app",
+  messagingSenderId: "811886499271",
+  appId: "1:811886499271:web:cd0af8d0721503142eb5e2"
 };
 
 firebase.initializeApp(firebaseConfig);

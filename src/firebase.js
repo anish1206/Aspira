@@ -8,13 +8,13 @@ import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 // Replace with your Firebase config credentials
 const firebaseConfig = {
-  apiKey: "AIzaSyA3EmCxGkk6trnlv9M5O3kMembDdwFZ8qQ",
-  authDomain: "mindsync-11947.firebaseapp.com",
-  projectId: "mindsync-11947",
-  storageBucket: "mindsync-11947.firebasestorage.app",
-  messagingSenderId: "815392141815",
-  appId: "1:815392141815:web:212e9bb66148815dca3ef2",
-  measurementId: "G-SFPYKKV2SN"
+  apiKey: "AIzaSyAbcxiltgXPDR_mNgt26dBuVxzC5z4T2Wc",
+  authDomain: "mindsync2-37bc8.firebaseapp.com",
+  projectId: "mindsync2-37bc8",
+  storageBucket: "mindsync2-37bc8.firebasestorage.app",
+  messagingSenderId: "811886499271",
+  appId: "1:811886499271:web:cd0af8d0721503142eb5e2",
+  measurementId: "G-XVH1BXWJ4W"
 };
 
 const app = initializeApp(firebaseConfig);

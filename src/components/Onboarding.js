@@ -317,7 +317,7 @@ const PreferencesStep = ({ onNext, onBack, preferences, setPreferences }) => {
   );
 };
 
-const PrivacyConsentStep = ({ onComplete, onBack, consent, setConsent }) => {
+const PrivacyConsentStep = ({ onComplete, onBack, consent, setConsent, isCompleting }) => {
   return (
     <OnboardingStep title="Privacy & Data Protection 🔒" step={4} totalSteps={4}>
       <div>
@@ -443,17 +443,17 @@ const PrivacyConsentStep = ({ onComplete, onBack, consent, setConsent }) => {
           </button>
           <button 
             onClick={onComplete}
-            disabled={!consent.dataProcessing || !consent.crisisIntervention}
+            disabled={!consent.dataProcessing || !consent.crisisIntervention || isCompleting}
             style={{
               padding: '12px 24px',
-              background: (consent.dataProcessing && consent.crisisIntervention) ? '#1976d2' : '#ccc',
+              background: (consent.dataProcessing && consent.crisisIntervention && !isCompleting) ? '#1976d2' : '#ccc',
               color: 'white',
               border: 'none',
               borderRadius: 4,
-              cursor: (consent.dataProcessing && consent.crisisIntervention) ? 'pointer' : 'not-allowed'
+              cursor: (consent.dataProcessing && consent.crisisIntervention && !isCompleting) ? 'pointer' : 'not-allowed'
             }}
           >
-            Complete Setup ✨
+            {isCompleting ? 'Setting up...' : 'Complete Setup ✨'}
           </button>
         </div>
       </div>
@@ -475,9 +475,15 @@ export default function Onboarding({ onComplete }) {
     crisisIntervention: false,
     analytics: false
   });
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const handleComplete = async () => {
+    if (isCompleting) return; // Prevent double submissions
+    
+    setIsCompleting(true);
     try {
+      console.log('Starting onboarding completion for user:', user?.uid);
+      
       const profileData = {
         language: selectedLanguage,
         preferences: {
@@ -489,16 +495,20 @@ export default function Onboarding({ onComplete }) {
         createdAt: new Date()
       };
 
+      console.log('Saving profile data:', profileData);
       await dataService.createUserProfile(user.uid, profileData);
       
       // Store in localStorage for quick access
       localStorage.setItem('mindsync_language', selectedLanguage);
       localStorage.setItem('mindsync_onboarded', 'true');
       
+      console.log('Onboarding completed successfully');
       onComplete();
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      alert('Failed to save preferences. Please try again.');
+      alert(`Failed to complete setup: ${error.message}. Please check your internet connection and try again.`);
+    } finally {
+      setIsCompleting(false);
     }
   };
 
@@ -540,6 +550,7 @@ export default function Onboarding({ onComplete }) {
           onBack={prevStep}
           consent={consent}
           setConsent={setConsent}
+          isCompleting={isCompleting}
         />
       )}
     </div>
