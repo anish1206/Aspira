@@ -31,30 +31,34 @@ module.exports = async (request, response) => {
 
     // Run the Firestore Transaction to book the slot
     await db.runTransaction(async (transaction) => {
-      const availabilityDoc = await transaction.get(availabilityref);
-      if (!availabilityDoc.exists) throw new Error("Mentor availability not found!");
+      // THIS IS THE LINE THAT WAS FIXED
+      const availabilityDoc = await transaction.get(availabilityRef); // <-- CORRECTED: Was 'availabilityref'
+      
+      if (!availabilityDoc.exists) {
+          throw new Error("Mentor availability not found!");
+      }
+
       const allSlots = availabilityDoc.data().slots;
       const selectedSlotIndex = allSlots.findIndex(s => s.startTime.seconds === slot.startTime.seconds);
-      if (selectedSlotIndex === -1 || allSlots[selectedSlotIndex].isBooked) throw new Error("This slot is no longer available.");
+      
+      if (selectedSlotIndex === -1 || allSlots[selectedSlotIndex].isBooked) {
+          throw new Error("This slot is no longer available.");
+      }
+
       allSlots[selectedSlotIndex].isBooked = true;
       allSlots[selectedSlotIndex].bookedBy = userId;
       transaction.update(availabilityRef, { slots: allSlots });
     });
 
-    // --- THE NEW, SIMPLIFIED LOGIC ---
-    // 1. Get the mentor's document, which now contains the static link.
+    // Get the mentor's document to find their static meeting link
     const mentorDoc = await mentorRef.get();
     const meetLink = mentorDoc.data().staticMeetLink;
 
-    // 2. Check if the link exists.
     if (!meetLink) {
         throw new Error("The mentor has not set their meeting link yet.");
     }
     
-    // (Optional: We can still create a simple calendar event for scheduling,
-    // but we will no longer use it to generate the link.)
-
-    // 3. Save the confirmed session with the pre-saved link.
+    // Save the confirmed session details with the pre-saved link
     await db.collection('sessions').add({
         mentorId,
         userId,
@@ -65,7 +69,7 @@ module.exports = async (request, response) => {
         createdAt: Timestamp.now(),
     });
 
-    // 4. Send the successful response back to the user.
+    // Send the successful response back to the user
     return response.status(200).json({ success: true, message: "Session booked successfully!", meetLink });
 
   } catch (error) {
