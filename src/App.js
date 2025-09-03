@@ -9,15 +9,18 @@ import Groups from "./pages/Groups";
 import Checkins from "./pages/Checkins";
 import Diary from "./pages/Diary";
 import Settings from "./pages/Settings";
+import Landing from "./pages/Landing";
+import MentorList from "./pages/MentorList";
+import MentorBooking from "./pages/MentorBooking";
 
 const Nav = () => {
   const { user } = useAuth();
   return (
     <nav className="flex gap-3 p-3 border-b border-gray-200 bg-white shadow-sm">
-      <Link to="/" className="text-blue-600 hover:text-blue-800 font-medium">Dashboard</Link>
+      <Link to="/dashboard" className="text-blue-600 hover:text-blue-800 font-medium">Dashboard</Link>
       <Link to="/chat" className="text-blue-600 hover:text-blue-800 font-medium">Chat</Link>
       <Link to="/groups" className="text-blue-600 hover:text-blue-800 font-medium">Groups</Link>
-      <Link to="/checkins" className="text-blue-600 hover:text-blue-800 font-medium">Mentors</Link>
+      <Link to="/mentors" className="text-blue-600 hover:text-blue-800 font-medium">Mentors</Link>
       <Link to="/diary" className="text-blue-600 hover:text-blue-800 font-medium">Diary</Link>
       <Link to="/settings" className="text-blue-600 hover:text-blue-800 font-medium">Settings</Link>
       <div className="ml-auto">
@@ -63,14 +66,17 @@ function App() {
   const location = useLocation();
   return (
     <div className="min-h-screen bg-gray-50">
-      {location.pathname !== "/login" && <Nav />}
+      {location.pathname !== "/login" && location.pathname !== "/" && <Nav />}
       <Routes>
-        <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/" element={<Landing />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/groups" element={<ProtectedRoute><Groups /></ProtectedRoute>} />
         <Route path="/checkins" element={<ProtectedRoute><Checkins /></ProtectedRoute>} />
         <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><SettingsWithSignOut /></ProtectedRoute>} />
+        <Route path="/mentors" element={<ProtectedRoute><MentorList /></ProtectedRoute>} />
+        <Route path="/mentors/:mentorId" element={<ProtectedRoute><MentorBooking /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

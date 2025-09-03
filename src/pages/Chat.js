@@ -45,7 +45,8 @@ const Chat = () => {
         parts: [{ text: msg.text }],
       }));
 
-      // 3. Call our new Vercel Serverless Function using the 'fetch' API
+      // 3. Call our Vercel Serverless Function using the 'fetch' API
+      // Use a relative path so it works on localhost and Vercel deployments
       const response = await fetch('/api/askGemini', {
         method: 'POST',
         headers: {
@@ -58,13 +59,29 @@ const Chat = () => {
         }),
       });
 
-      // If the server responds with an error, handle it
+      // Read the response as text first to guard against HTML errors
+      const raw = await response.text();
+
+      // Try to parse JSON; if it fails, log the raw response
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch (e) {
+        console.error('Non-JSON response received from API:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+          bodyPreview: raw.slice(0, 500)
+        });
+        throw new Error('Received non-JSON response from API.');
+      }
+
+      // If the server responds with an error-like JSON, handle it
       if (!response.ok) {
-        throw new Error('The server responded with an error.');
+        throw new Error(data?.message || 'The server responded with an error.');
       }
 
       // 4. Process the successful response
-      const data = await response.json(); // Get the JSON data from the response
       const modelResponse = { role: 'model', text: data.text };
       
       // Update the UI with the AI's response

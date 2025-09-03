@@ -37,7 +37,7 @@ const Login = () => {
         await signInWithEmailAndPassword(auth, email, password);
         alert("Login successful! 🎉");
       }
-      navigate("/", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err.message);
     }
@@ -48,7 +48,7 @@ const Login = () => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      navigate("/", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(err.message);
     }
@@ -63,7 +63,7 @@ const Login = () => {
   };
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
