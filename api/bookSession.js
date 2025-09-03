@@ -66,9 +66,8 @@ module.exports = async (request, response) => {
     const mentorDoc = await mentorRef.get();
     const mentorEmail = mentorDoc.data().email;
 
-    // --- THE CRITICAL CHANGE IS HERE ---
-    // We create a plain event object WITHOUT the conferenceData section.
-    // We are relying on the mentor's calendar to add a Meet link by default.
+    // --- FINAL, MOST ROBUST VERSION OF THE EVENT OBJECT ---
+    // We are explicitly asking for a conference to be created.
     const event = {
       summary: `Mindsync Mentorship Session`,
       description: `A 30-minute check-in session with a Mindsync user.`,
@@ -80,21 +79,25 @@ module.exports = async (request, response) => {
         dateTime: new Date(slot.endTime.seconds * 1000),
         timeZone: 'UTC',
       },
+      // This is our new, explicit request for a video call.
+      conferenceData: {
+        createRequest: {
+          requestId: `mindsync-booking-${userId}-${Date.now()}`,
+        },
+      },
     };
 
-    // We now pass 'conferenceDataVersion: 1' as a PARAMETER, not in the body.
-    // This tells Google: "Please ensure a conference link is present in the response."
     const calendarResponse = await calendar.events.insert({
       calendarId: mentorEmail,
       resource: event,
-      conferenceDataVersion: 1, // <--- This parameter is still important!
+      conferenceDataVersion: 1, 
     });
 
     const meetLink = calendarResponse.data.hangoutLink;
 
-    // If for some reason a link wasn't created, we should throw an error.
     if (!meetLink) {
-        throw new Error("A Google Meet link could not be generated for this event.");
+        // This error should not happen now, but it's good to keep as a failsafe.
+        throw new Error("A Google Meet link could not be generated for this event. Please check the mentor's calendar settings.");
     }
 
     await db.collection('sessions').add({
