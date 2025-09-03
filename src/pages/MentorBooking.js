@@ -74,17 +74,18 @@ function MentorBooking() {
 
 // ... (keep all your other imports and component code) ...
 
+// src/pages/MentorBooking.js
+
 const handleBookNow = async (slot) => {
     if (!user) {
-        navigate("/login", { replace: true });
+        alert("Please log in to book a session.");
         return;
     }
 
     setBookingStatus({ loading: true, error: null, success: false });
 
     try {
-        const apiBase = process.env.REACT_APP_API_BASE || '';
-        const response = await fetch(`${apiBase}/api/bookSession`, {
+        const response = await fetch('/api/bookSession', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -93,38 +94,23 @@ const handleBookNow = async (slot) => {
                 mentorId: mentorId,
                 slot: slot,
                 userId: user.uid,
-                userEmail: user.email,
+                // userEmail: user.email, // <--- THIS LINE IS REMOVED
             }),
         });
 
-        // Try to parse JSON; if not JSON, read as text and throw a clearer error
-        const contentType = response.headers.get('content-type') || '';
-        let data;
-        if (contentType.includes('application/json')) {
-          data = await response.json();
-        } else {
-          const text = await response.text();
-          throw new Error(text || `Unexpected response (${response.status}) from booking API`);
-        }
+        const data = await response.json();
 
-        if (!response.ok || !data.success) {
+        if (!response.ok) {
             throw new Error(data.message || "Failed to book the session.");
         }
 
         setBookingStatus({ loading: false, error: null, success: true });
-
-        // Optimistically mark the slot as booked in local state
-        setAvailability((prev) => {
-          if (!prev) return prev;
-          const updated = (prev.slots || []).map((s) =>
-            s?.startTime?.seconds === slot.startTime?.seconds
-              ? { ...s, isBooked: true, bookedBy: user.uid }
-              : s
-          );
-          return { ...prev, slots: updated };
-        });
-
-        alert(`Booking successful! A calendar invite has been sent.${data.meetLink ? ` Meet link: ${data.meetLink}` : ''}`);
+        
+        // --- IMPROVED SUCCESS MESSAGE ---
+        alert(`Booking successful! Please save this Google Meet link:\n\n${data.meetLink}`);
+        
+        // Refetch the availability data to update the UI
+        // (You should implement this part to refresh the slot list)
 
     } catch (error) {
         console.error("Frontend booking error:", error);
