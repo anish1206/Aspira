@@ -1,21 +1,23 @@
 // /api/bookSession.js
 
-const { google } = require("googleapis");
 const { initializeApp, cert, getApps } = require("firebase-admin/app");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 
-// --- (All initialization code remains the same) ---
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-if (!getApps().length) { initializeApp({ credential: cert(serviceAccount) }); }
+// --- We ONLY need the Firebase Admin SDK now ---
+const serviceAccount = JSON.parse(
+  process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+);
+
+if (!getApps().length) {
+  initializeApp({
+    credential: cert(serviceAccount),
+  });
+}
 const db = getFirestore();
-const SCOPES = ["https://www.googleapis.com/auth/calendar"];
-const googleCredentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS);
-const auth = new google.auth.GoogleAuth({ credentials: googleCredentials, scopes: SCOPES });
-const calendar = google.calendar({ version: "v3", auth });
 
 // --- The Main Handler Function ---
 module.exports = async (request, response) => {
-  // (CORS headers and method checks remain the same)
+  // CORS Headers and method checks
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -27,65 +29,43 @@ module.exports = async (request, response) => {
     const mentorRef = db.collection('mentors').doc(mentorId);
     const availabilityRef = db.collection('mentorAvailability').doc(mentorId);
 
-    // (Firestore transaction remains the same)
+    // Run the Firestore Transaction to book the slot
     await db.runTransaction(async (transaction) => {
-        const availabilityDoc = await transaction.get(availabilityRef);
-        if (!availabilityDoc.exists) throw new Error("Mentor availability not found!");
-        const allSlots = availabilityDoc.data().slots;
-        const selectedSlotIndex = allSlots.findIndex(s => s.startTime.seconds === slot.startTime.seconds);
-        if (selectedSlotIndex === -1 || allSlots[selectedSlotIndex].isBooked) throw new Error("This slot is no longer available.");
-        allSlots[selectedSlotIndex].isBooked = true;
-        allSlots[selectedSlotIndex].bookedBy = userId;
-        transaction.update(availabilityRef, { slots: allSlots });
+      const availabilityDoc = await transaction.get(availabilityref);
+      if (!availabilityDoc.exists) throw new Error("Mentor availability not found!");
+      const allSlots = availabilityDoc.data().slots;
+      const selectedSlotIndex = allSlots.findIndex(s => s.startTime.seconds === slot.startTime.seconds);
+      if (selectedSlotIndex === -1 || allSlots[selectedSlotIndex].isBooked) throw new Error("This slot is no longer available.");
+      allSlots[selectedSlotIndex].isBooked = true;
+      allSlots[selectedSlotIndex].bookedBy = userId;
+      transaction.update(availabilityRef, { slots: allSlots });
     });
 
+    // --- THE NEW, SIMPLIFIED LOGIC ---
+    // 1. Get the mentor's document, which now contains the static link.
     const mentorDoc = await mentorRef.get();
-    const mentorEmail = mentorDoc.data().email;
+    const meetLink = mentorDoc.data().staticMeetLink;
 
-    const event = {
-      summary: `Mindsync Mentorship Session`,
-      description: `A 30-minute check-in session with a Mindsync user.`,
-      start: { dateTime: new Date(slot.startTime.seconds * 1000), timeZone: 'UTC' },
-      end: { dateTime: new Date(slot.endTime.seconds * 1000), timeZone: 'UTC' },
-      conferenceData: { createRequest: { requestId: `mindsync-booking-${userId}-${Date.now()}` } },
-    };
-
-    // --- THE DEFINITIVE FIX: TWO-STEP CREATE-THEN-GET ---
-
-    // STEP 1: Insert the event. The initial response might not have the Meet link.
-    const initialCalendarResponse = await calendar.events.insert({
-      calendarId: mentorEmail,
-      resource: event,
-      conferenceDataVersion: 1,
-    });
-
-    // Get the unique ID of the event we just created.
-    const eventId = initialCalendarResponse.data.id;
-    if (!eventId) {
-        throw new Error("Event was created but no eventId was returned.");
-    }
-
-    // STEP 2: Immediately 'get' the event using its ID. This response WILL have the link.
-    const finalEventResponse = await calendar.events.get({
-        calendarId: mentorEmail,
-        eventId: eventId,
-    });
-
-    const meetLink = finalEventResponse.data.hangoutLink;
-
+    // 2. Check if the link exists.
     if (!meetLink) {
-        // This is our final safety net. It should never be triggered now.
-        throw new Error("A Google Meet link could not be found even after fetching the created event.");
+        throw new Error("The mentor has not set their meeting link yet.");
     }
+    
+    // (Optional: We can still create a simple calendar event for scheduling,
+    // but we will no longer use it to generate the link.)
 
-    // (Saving the session to Firestore remains the same)
+    // 3. Save the confirmed session with the pre-saved link.
     await db.collection('sessions').add({
-        mentorId, userId,
+        mentorId,
+        userId,
         sessionStartTime: Timestamp.fromMillis(slot.startTime.seconds * 1000),
         sessionEndTime: Timestamp.fromMillis(slot.endTime.seconds * 1000),
-        googleMeetLink: meetLink, status: 'confirmed', createdAt: Timestamp.now(),
+        googleMeetLink: meetLink, // Using the static link here!
+        status: 'confirmed',
+        createdAt: Timestamp.now(),
     });
 
+    // 4. Send the successful response back to the user.
     return response.status(200).json({ success: true, message: "Session booked successfully!", meetLink });
 
   } catch (error) {
