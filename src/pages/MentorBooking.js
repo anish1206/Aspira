@@ -1,207 +1,222 @@
-// src/pages/MentorBooking.js
-import React, { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
-import { useAuth } from "../auth";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase'; // Your Firebase config file
+import { useAuth } from '../auth'; // Your auth context hook
 
-function formatSlotRange(slot) {
-  try {
-    const start = new Date(slot.startTime.seconds * 1000);
-    const end = new Date(slot.endTime.seconds * 1000);
-    const dateStr = start.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    const startStr = start.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-    const endStr = end.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-    return `${startStr} - ${endStr} on ${dateStr}`;
-  } catch (e) {
-    return "Invalid time";
-  }
-}
+const MentorBooking = () => {
+  const { mentorId } = useParams(); // Get mentor ID from the URL (e.g., /mentors/anish)
+  const { user } = useAuth(); // Get the currently logged-in user
 
-function MentorBooking() {
-  const { mentorId } = useParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [mentor, setMentor] = useState(null);
-  const [availability, setAvailability] = useState(null);
+  // State for the mentor's profile data
+  const [mentorData, setMentorData] = useState(null);
+  // State for the mentor's available time slots
+  const [availabilityData, setAvailabilityData] = useState(null);
+  // State for the page's initial loading status
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [bookingStatus, setBookingStatus] = useState({ loading: false, error: null, success: false });
+  // State for any errors during data fetching
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      setError("");
-      try {
-        const mentorRef = doc(db, "mentors", mentorId);
-        const availRef = doc(db, "mentorAvailability", mentorId);
-        const [mentorSnap, availSnap] = await Promise.all([
-          getDoc(mentorRef),
-          getDoc(availRef),
-        ]);
+  // State to manage the status of the booking API call
+  const [bookingStatus, setBookingStatus] = useState({
+    loading: false,
+    error: null,
+    success: false,
+  });
 
-        if (!mentorSnap.exists()) {
-          throw new Error("Mentor not found");
-        }
-        setMentor({ id: mentorSnap.id, ...mentorSnap.data() });
+  // A function to fetch all necessary data from Firestore
+  const fetchData = useCallback(async () => {
+    if (!mentorId) return;
+    setLoading(true);
+    try {
+      // Fetch mentor's profile
+      const mentorRef = doc(db, 'mentors', mentorId);
+      const mentorSnap = await getDoc(mentorRef);
 
-        if (availSnap.exists()) {
-          setAvailability({ id: availSnap.id, ...availSnap.data() });
-        } else {
-          setAvailability({ id: mentorId, slots: [] });
-        }
-      } catch (err) {
-        setError(err.message || "Failed to load mentor data");
-        // eslint-disable-next-line no-console
-        console.error(err);
-      } finally {
-        setLoading(false);
+      // Fetch mentor's availability
+      const availabilityRef = doc(db, 'mentorAvailability', mentorId);
+      const availabilitySnap = await getDoc(availabilityRef);
+
+      if (mentorSnap.exists() && availabilitySnap.exists()) {
+        setMentorData(mentorSnap.data());
+        setAvailabilityData(availabilitySnap.data());
+      } else {
+        throw new Error('Mentor not found or availability not set.');
       }
-    }
-
-    if (mentorId) {
-      fetchData();
+    } catch (err) {
+      console.error('Error fetching mentor data:', err);
+      setError('Could not load mentor details. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   }, [mentorId]);
 
-  const slots = useMemo(() => (availability?.slots ? availability.slots : []), [availability]);
+  // Run the data fetching function when the component mounts
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  // src/pages/MentorBooking.js
-
-// ... (keep all your other imports and component code) ...
-
-// src/pages/MentorBooking.js
-
-const handleBookNow = async (slot) => {
+  // This is the main function called when a user clicks "Book Now"
+  const handleBookNow = async (slot) => {
     if (!user) {
-        alert("Please log in to book a session.");
-        return;
+      alert('Please log in or sign up to book a session.');
+      return;
     }
 
+    // Set the state to show a loading indicator
     setBookingStatus({ loading: true, error: null, success: false });
 
     try {
-        const response = await fetch('/api/bookSession', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                mentorId: mentorId,
-                slot: slot,
-                userId: user.uid,
-                // userEmail: user.email, // <--- THIS LINE IS REMOVED
-            }),
-        });
+      // Call our Vercel serverless function
+      const response = await fetch('/api/bookSession', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mentorId: mentorId,
+          slot: slot,
+          userId: user.uid,
+          userEmail: user.email, // Passing the user's email for the confirmation
+        }),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (!response.ok) {
-            throw new Error(data.message || "Failed to book the session.");
-        }
+      if (!response.ok) {
+        // If the server returns an error, throw it to the catch block
+        throw new Error(data.message || 'An unknown error occurred.');
+      }
 
-        setBookingStatus({ loading: false, error: null, success: true });
-        
-        // --- IMPROVED SUCCESS MESSAGE ---
-        alert(`Booking successful! Please save this Google Meet link:\n\n${data.meetLink}`);
-        
-        // Refetch the availability data to update the UI
-        // (You should implement this part to refresh the slot list)
+      // On success, update the state and show a confirmation
+      setBookingStatus({ loading: false, error: null, success: true });
+      alert(`Booking successful! A confirmation email has been sent to ${user.email}.`);
+      
+      // Refresh the availability data to show the slot as booked
+      fetchData();
 
-    } catch (error) {
-        console.error("Frontend booking error:", error);
-        setBookingStatus({ loading: false, error: error.message, success: false });
-        alert(`Error: ${error.message}`);
+    } catch (err) {
+      // On failure, update the state and show the error
+      console.error('Frontend booking error:', err);
+      setBookingStatus({ loading: false, error: err.message, success: false });
+      alert(`Booking Failed: ${err.message}`);
     }
-};
+  };
 
-// In your JSX, you can use the bookingStatus to show messages to the user
-// e.g., if (bookingStatus.loading) return <p>Booking your session...</p>;
-// And remember to disable the button when booking is in progress
-// <button onClick={() => handleBookNow(slot)} disabled={bookingStatus.loading}>
+  // --- Render Logic ---
 
   if (loading) {
-    return <div className="p-5 text-gray-600">Loading mentor...</div>;
+    return <div style={styles.container}><p>Loading mentor details...</p></div>;
   }
 
   if (error) {
-    return <div className="p-5 text-red-600">{error}</div>;
+    return <div style={styles.container}><p style={styles.errorText}>{error}</p></div>;
   }
 
-  if (!mentor) {
-    return <div className="p-5 text-gray-600">Mentor not found.</div>;
+  if (!mentorData || !availabilityData) {
+    return <div style={styles.container}><p>No mentor data available.</p></div>;
   }
 
   return (
-    <div className="p-5 space-y-6">
-      <div className="flex items-start gap-4 bg-white p-4 border border-gray-200 rounded-lg shadow-sm">
-        {mentor.photoURL ? (
-          <img
-            src={mentor.photoURL}
-            alt={mentor.name}
-            className="w-24 h-24 object-cover rounded-full border"
-          />
-        ) : (
-          <div className="w-24 h-24 rounded-full bg-gray-200" />
-        )}
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-gray-900">{mentor.name}</h2>
-          {mentor.email && (
-            <p className="text-sm text-gray-600 mt-1">{mentor.email}</p>
-          )}
-          {Array.isArray(mentor.specialties) && mentor.specialties.length > 0 && (
-            <p className="text-sm text-gray-700 mt-2">
-              Specialties: {mentor.specialties.join(", ")}
-            </p>
-          )}
-          {mentor.bio && (
-            <p className="text-gray-800 mt-3">{mentor.bio}</p>
-          )}
-        </div>
+    <div style={styles.container}>
+      <div style={styles.profileSection}>
+        <img src={mentorData.photoURL} alt={mentorData.name} style={styles.profileImage} />
+        <h1>{mentorData.name}</h1>
+        <p style={styles.specialties}>Specialties: {mentorData.specialties.join(', ')}</p>
+        <p>{mentorData.bio}</p>
       </div>
 
-      <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-sm">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">Available Time Slots</h3>
-        {slots.length === 0 ? (
-          <div className="text-gray-600">No available slots.</div>
+      <div style={styles.slotsSection}>
+        <h2>Available Sessions</h2>
+        {availabilityData.slots && availabilityData.slots.length > 0 ? (
+          availabilityData.slots.map((slot, index) => {
+            const startTime = new Date(slot.startTime.seconds * 1000);
+            const endTime = new Date(slot.endTime.seconds * 1000);
+            
+            return (
+              <div key={index} style={styles.slotCard}>
+                <div style={styles.slotTime}>
+                  <p><strong>Date:</strong> {startTime.toLocaleDateString()}</p>
+                  <p>
+                    <strong>Time:</strong>{' '}
+                    {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
+                    {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+                <button
+                  style={slot.isBooked || bookingStatus.loading ? styles.bookedButton : styles.bookButton}
+                  onClick={() => handleBookNow(slot)}
+                  disabled={slot.isBooked || bookingStatus.loading}
+                >
+                  {bookingStatus.loading ? 'Booking...' : (slot.isBooked ? 'Booked' : 'Book Now')}
+                </button>
+              </div>
+            );
+          })
         ) : (
-          <ul className="space-y-3">
-            {slots.map((slot, idx) => (
-              <li
-                key={`${slot.startTime?.seconds || ""}-${idx}`}
-                className="flex items-center justify-between p-3 border border-gray-100 rounded hover:bg-gray-50"
-              >
-                <div className="text-gray-800">{formatSlotRange(slot)}</div>
-                {slot.isBooked ? (
-                  <button
-                    type="button"
-                    disabled
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded cursor-not-allowed"
-                  >
-                    Booked
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleBookNow(slot)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                  >
-                    Book Now
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
+          <p>This mentor has no available sessions at the moment.</p>
         )}
       </div>
     </div>
   );
-}
+};
+
+// --- Basic CSS-in-JS for Styling ---
+
+const styles = {
+  container: {
+    padding: '20px',
+    maxWidth: '800px',
+    margin: 'auto',
+  },
+  profileSection: {
+    textAlign: 'center',
+    marginBottom: '40px',
+  },
+  profileImage: {
+    width: '150px',
+    height: '150px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+  },
+  specialties: {
+    color: '#555',
+    fontStyle: 'italic',
+  },
+  slotsSection: {
+    marginTop: '20px',
+  },
+  slotCard: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '15px',
+    border: '1px solid #eee',
+    borderRadius: '8px',
+    marginBottom: '10px',
+  },
+  slotTime: {
+    margin: 0,
+  },
+  bookButton: {
+    padding: '10px 20px',
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  },
+  bookedButton: {
+    padding: '10px 20px',
+    backgroundColor: '#ccc',
+    color: '#666',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'not-allowed',
+  },
+  errorText: {
+    color: 'red',
+  },
+};
 
 export default MentorBooking;
-
-
