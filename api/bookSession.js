@@ -1,5 +1,3 @@
-// /api/bookSession.js
-
 const { initializeApp, cert, getApps } = require("firebase-admin/app");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { google } = require("googleapis");
@@ -29,23 +27,13 @@ module.exports = async (request, response) => {
     const mentorRef = db.collection('mentors').doc(mentorId);
     const availabilityRef = db.collection('mentorAvailability').doc(mentorId);
 
-    // --- Firestore Transaction ---
-    // This is the part that will now work correctly.
+    // (Firestore transaction is correct and remains the same)
     await db.runTransaction(async (transaction) => {
-      // THE TYPO IS FIXED ON THE LINE BELOW
-      const availabilityDoc = await transaction.get(availabilityRef); 
-
-      if (!availabilityDoc.exists) {
-          throw new Error("Mentor availability not found!");
-      }
-
+      const availabilityDoc = await transaction.get(availabilityRef);
+      if (!availabilityDoc.exists) throw new Error("Mentor availability not found!");
       const allSlots = availabilityDoc.data().slots;
       const selectedSlotIndex = allSlots.findIndex(s => s.startTime.seconds === slot.startTime.seconds);
-      
-      if (selectedSlotIndex === -1 || allSlots[selectedSlotIndex].isBooked) {
-          throw new Error("This slot is no longer available.");
-      }
-
+      if (selectedSlotIndex === -1 || allSlots[selectedSlotIndex].isBooked) throw new Error("This slot is no longer available.");
       allSlots[selectedSlotIndex].isBooked = true;
       allSlots[selectedSlotIndex].bookedBy = userId;
       transaction.update(availabilityRef, { slots: allSlots });
@@ -58,7 +46,7 @@ module.exports = async (request, response) => {
 
     if (!meetLink) throw new Error("The mentor has not set their meeting link yet.");
     
-    // (Create Calendar Event logic remains the same)
+    // (Create Calendar Event logic is correct and remains the same)
     const event = {
       summary: `Mindsync Session with User`,
       description: `Meeting link: ${meetLink}`,
@@ -72,13 +60,30 @@ module.exports = async (request, response) => {
       console.error("Could not create calendar event, but proceeding.", calendarError);
     }
 
-    // (Send Confirmation Email logic remains the same)
+    // --- THE FIX IS HERE ---
+    // We are replacing the placeholder with a real, dynamic HTML email body.
     const sessionTime = new Date(slot.startTime.seconds * 1000).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });
     await resend.emails.send({
       from: 'Mindsync <onboarding@resend.dev>',
       to: [userEmail],
       subject: 'Your Mindsync Mentorship Session is Confirmed!',
-      html: `... your email html ...`,
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h1 style="color: #333;">Your Session is Booked!</h1>
+          <p>Hi there,</p>
+          <p>This is a confirmation that your mentorship session with <strong>${mentorData.name}</strong> has been successfully booked.</p>
+          <hr>
+          <h3>Session Details:</h3>
+          <p><strong>Time:</strong> ${sessionTime}</p>
+          <p><strong>Link to Join:</strong></p>
+          <p><a href="${meetLink}" style="padding: 12px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; display: inline-block;">Join Google Meet</a></p>
+          <hr>
+          <p>We recommend joining the call a few minutes early to ensure your connection is working.</p>
+          <p>We look forward to seeing you!</p>
+          <br>
+          <p>- The Mindsync Team</p>
+        </div>
+      `,
     });
     
     // (Save session to database logic remains the same)
