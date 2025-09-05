@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Berkeley+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jersey+15&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -295,4 +296,14 @@ code {
 @layer base {
   * { border-color: var(--border); outline-color: color-mix(in oklab, var(--ring) 50%, transparent); }
   body { background: var(--background); color: var(--foreground); font-size: var(--font-size); }
+}
+
+/* Typewriter caret blink */
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.animate-caret-blink {
+  animation: caret-blink 1s step-end infinite;
 }

@@ -8,7 +8,7 @@ export const Header = () => {
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <span className="text-3xl font-berkeley-mono font-bold text-foreground">Aspira</span>
+          <span className="text-6xl jersey-15-regular text-foreground">Aspira</span>
         </div>
         
         {/* Navigation */}

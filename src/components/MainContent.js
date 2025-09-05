@@ -1,6 +1,69 @@
 // src/components/MainContent.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+
+// Typewriter with optional delete/repeat and blinking caret
+const Typewriter = ({
+  text,
+  speed = 170, // slower typing
+  deleteSpeed = 80,
+  startDelay = 300,
+  pause = 800,
+  repeat = 1,
+  deleteOnFinish = false,
+}) => {
+  const [index, setIndex] = useState(0);
+  const [phase, setPhase] = useState("idle"); // idle -> typing -> deleting -> done
+  const [loops, setLoops] = useState(0);
+
+  useEffect(() => {
+    if (phase === "idle") {
+      const t = setTimeout(() => setPhase("typing"), startDelay);
+      return () => clearTimeout(t);
+    }
+
+    if (phase === "typing") {
+      if (index < text.length) {
+        const t = setTimeout(() => setIndex(index + 1), speed);
+        return () => clearTimeout(t);
+      }
+      // Reached full text
+      if (deleteOnFinish) {
+        const t = setTimeout(() => setPhase("deleting"), pause);
+        return () => clearTimeout(t);
+      }
+      setPhase("done");
+      return;
+    }
+
+    if (phase === "deleting") {
+      if (index > 0) {
+        const t = setTimeout(() => setIndex(index - 1), deleteSpeed);
+        return () => clearTimeout(t);
+      }
+      // Finished deleting one cycle
+      if (loops + 1 >= repeat) {
+        setPhase("done");
+        return;
+      }
+      setLoops(loops + 1);
+      const t = setTimeout(() => setPhase("typing"), 300);
+      return () => clearTimeout(t);
+    }
+  }, [phase, index, text, speed, deleteSpeed, pause, startDelay, loops, repeat]);
+
+  return (
+    <span className="inline-flex items-center">
+      <span className="font-berkeley-mono font-bold bg-gradient-to-r from-primary via-blue-600 to-orange-500 bg-clip-text text-transparent">
+        {text.slice(0, index)}
+      </span>
+      <span
+        className="ml-1 w-[2px] h-[1em] bg-blue-500 align-middle animate-caret-blink"
+  style={{ visibility: "visible" }}
+      />
+    </span>
+  );
+};
 
 export const MainContent = () => {
   return (
@@ -11,9 +74,7 @@ export const MainContent = () => {
           Trans<i>f</i>orm Yo<i>u</i>r
           <br />
           Mental{" "}
-          <span className="font-berkeley-mono font-bold bg-gradient-to-r from-primary via-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Wellness
-          </span>
+          <Typewriter text="Wellness" speed={170} deleteOnFinish={false} />
         </h1>
         
         {/* Subtitle */}

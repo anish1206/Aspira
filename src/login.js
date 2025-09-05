@@ -100,7 +100,7 @@ const Login = () => {
       <div className="login-header">
         <div className="brand">
           <div className="flex items-center space-x-2">
-          <span className="text-3xl font-berkeley-mono font-bold text-foreground">Aspira</span>
+          <span className="text-3xl jersey-15-regular font-bold text-foreground">Aspira</span>
         </div>
         </div>
       </div>
