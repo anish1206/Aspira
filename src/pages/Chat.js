@@ -1,208 +1,137 @@
-// src/pages/Chat.js
-
 import React, { useState, useEffect, useRef } from "react";
 
 const Chat = () => {
-  // State to hold the entire conversation history
-  const [messages, setMessages] = useState([
-    { role: 'model', text: "Hello! I'm Mindsync. I'm here to listen. How are you feeling today?" }
-  ]);
-
-  // State for the user's current input
+  // Conversation messages (hidden until user starts)
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  
-  // State to show a "thinking..." message while waiting for the API
   const [loading, setLoading] = useState(false);
-  
-  // A ref to the chat container div to enable auto-scrolling
+  const [started, setStarted] = useState(false); // track if user initiated chat
   const chatContainerRef = useRef(null);
 
-  // This effect runs every time the 'messages' array changes
   useEffect(() => {
-    // If the chat container exists, scroll to the very bottom
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // This function is called when the user clicks "Send" or presses Enter
   const handleSend = async () => {
-    // Prevent sending empty messages or sending while the AI is responding
     if (newMessage.trim() === "" || loading) return;
+    if (!started) setStarted(true);
 
-    // 1. Optimistically update the UI with the user's new message
-    const userMessage = { role: 'user', text: newMessage };
+    const userMessage = { role: 'user', text: newMessage.trim() };
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
-    setNewMessage(""); // Clear the input field
-    setLoading(true);  // Show the loading indicator
+    setNewMessage("");
+    setLoading(true);
 
     try {
-      // 2. Prepare the data for the API call
-      // The API needs the chat history *before* the user's new message
       const historyForAPI = updatedMessages.slice(0, -1).map(msg => ({
         role: msg.role,
         parts: [{ text: msg.text }],
       }));
 
-      // 3. Call our Vercel Serverless Function using the 'fetch' API
-      // Use a relative path so it works on localhost and Vercel deployments
       const response = await fetch('/api/askGemini', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // Send the history and the new message in the request body
-        body: JSON.stringify({
-          history: historyForAPI,
-          message: newMessage,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ history: historyForAPI, message: userMessage.text }),
       });
 
-      // Read the response as text first to guard against HTML errors
       const raw = await response.text();
-
-      // Try to parse JSON; if it fails, log the raw response
       let data;
-      try {
-        data = JSON.parse(raw);
-      } catch (e) {
-        console.error('Non-JSON response received from API:', {
-          status: response.status,
-          statusText: response.statusText,
-          url: response.url,
-          bodyPreview: raw.slice(0, 500)
-        });
-        throw new Error('Received non-JSON response from API.');
-      }
+      try { data = JSON.parse(raw); } catch (e) { throw new Error('Non-JSON response'); }
+      if (!response.ok) throw new Error(data?.message || 'Server error');
 
-      // If the server responds with an error-like JSON, handle it
-      if (!response.ok) {
-        throw new Error(data?.message || 'The server responded with an error.');
-      }
-
-      // 4. Process the successful response
-      const modelResponse = { role: 'model', text: data.text };
-      
-      // Update the UI with the AI's response
-      setMessages(prev => [...prev, modelResponse]);
-
-    } catch (error) {
-      // 5. Handle any errors that occurred during the API call
-      console.error("Error calling Vercel API endpoint:", error);
-      const errorMessage = { role: 'model', text: "Sorry, something went wrong. Please try again." };
-      setMessages(prev => [...prev, errorMessage]);
-
+      setMessages(prev => [...prev, { role: 'model', text: data.text }]);
+    } catch (err) {
+      setMessages(prev => [...prev, { role: 'model', text: 'Sorry, something went wrong. Please try again.' }]);
     } finally {
-      // 6. Clean up
-      // No matter what happens, stop the loading indicator
       setLoading(false);
     }
   };
 
+  // Initial centered view
+  if (!started) {
+    return (
+      <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-4 text-center">
+        <h2 className="text-4xl md:text-4xl font-semibold mb-8 tracking-tight text-foreground">
+          Hello! How you feelin today?
+        </h2>
+        <div className="w-full max-w-xl relative group">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Share anything that's on your mind..."
+            className="w-full rounded-full py-4 pl-6 pr-16 bg-white/80 backdrop-blur-sm border border-yellow-300/60 shadow-[0_0_0_1px_rgba(253,224,71,0.55),0_4px_12px_-2px_rgba(250,204,21,0.25)] focus:shadow-[0_0_0_2px_rgba(250,204,21,0.8),0_6px_18px_-4px_rgba(250,204,21,0.35)] outline-none transition-all text-base placeholder:text-slate-500"
+            disabled={loading}
+          />
+          <button
+            onClick={handleSend}
+            disabled={loading}
+            className="absolute top-1/2 -translate-y-1/2 right-2 w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+            aria-label="Send"
+          >
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+              <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Chat view after user starts
   return (
-    <div style={styles.chatPage}>
-      <div style={styles.chatContainer} ref={chatContainerRef}>
-        {/* Map over the messages array and display each one */}
-        {messages.map((msg, index) => (
-          <div key={index} style={msg.role === 'user' ? styles.userMessageContainer : styles.modelMessageContainer}>
-            <div style={msg.role === 'user' ? styles.userMessage : styles.modelMessage}>
-              <p style={{ margin: 0 }}>{msg.text}</p>
+    <div className="flex flex-col h-[calc(100vh-80px)] max-w-3xl mx-auto w-full px-4 py-4">
+      <div
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300/40"
+      >
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div
+              className={`px-4 py-3 rounded-2xl max-w-[75%] text-sm md:text-base leading-relaxed shadow-sm ${
+                msg.role === 'user'
+                  ? 'bg-gradient-to-br from-yellow-400 to-orange-400 text-white rounded-br-sm'
+                  : 'bg-white/70 backdrop-blur border border-border text-foreground rounded-bl-sm'
+              }`}
+            >
+              {msg.text}
             </div>
           </div>
         ))}
-        {/* Show a "thinking..." message while loading */}
         {loading && (
-          <div style={styles.modelMessageContainer}>
-            <div style={styles.modelMessage}>
-              <p style={{ margin: 0 }}>Mindsync is thinking...</p>
+          <div className="flex justify-start">
+            <div className="px-4 py-3 rounded-2xl bg-white/70 border border-border text-foreground text-sm shadow-sm animate-pulse">
+              Mindsync is thinking...
             </div>
           </div>
         )}
       </div>
-      <div style={styles.inputArea}>
+      <div className="mt-4 relative w-full">
         <input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          // Allow sending with the Enter key
-          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Type your message here..."
-          style={styles.inputField}
+          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          placeholder="Type your message..."
+          className="w-full rounded-full py-4 pl-6 pr-16 bg-white/90 backdrop-blur border border-yellow-300/60 shadow-[0_0_0_1px_rgba(253,224,71,0.55),0_4px_12px_-2px_rgba(250,204,21,0.25)] focus:shadow-[0_0_0_2px_rgba(250,204,21,0.8),0_6px_18px_-4px_rgba(250,204,21,0.35)] outline-none transition-all text-base placeholder:text-black-400"
           disabled={loading}
         />
-        <button onClick={handleSend} style={styles.sendButton} disabled={loading}>
-          Send
+        <button
+          onClick={handleSend}
+          disabled={loading}
+            className="absolute top-1/2 -translate-y-1/2 right-2 w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+          aria-label="Send"
+        >
+          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+            <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z" />
+          </svg>
         </button>
       </div>
     </div>
   );
-};
-
-// Basic CSS-in-JS for styling the chat component
-const styles = {
-    chatPage: { 
-        display: 'flex', 
-        flexDirection: 'column', 
-        height: 'calc(100vh - 80px)', // Adjust height based on your nav bar
-        maxWidth: '800px', 
-        margin: 'auto',
-        border: '1px solid #eee',
-        borderRadius: '8px',
-        marginTop: '10px'
-    },
-    chatContainer: { 
-        flex: 1, 
-        overflowY: 'auto', 
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    inputArea: { 
-        display: 'flex', 
-        padding: '10px',
-        borderTop: '1px solid #eee'
-    },
-    inputField: { 
-        flex: 1, 
-        padding: '12px', 
-        borderRadius: '20px', 
-        border: '1px solid #ccc',
-        fontSize: '16px'
-    },
-    sendButton: { 
-        padding: '10px 20px', 
-        marginLeft: '10px', 
-        borderRadius: '20px', 
-        border: 'none', 
-        backgroundColor: '#007bff', 
-        color: 'white', 
-        cursor: 'pointer' 
-    },
-    userMessageContainer: {
-        display: 'flex',
-        justifyContent: 'flex-end',
-        marginBottom: '10px',
-    },
-    modelMessageContainer: {
-        display: 'flex',
-        justifyContent: 'flex-start',
-        marginBottom: '10px',
-    },
-    userMessage: {  
-        backgroundColor: '#007bff', 
-        color: 'white', 
-        padding: '10px 15px', 
-        borderRadius: '20px 20px 5px 20px', 
-        maxWidth: '75%' 
-    },
-    modelMessage: { 
-        backgroundColor: '#f1f1f1', 
-        color: 'black',
-        padding: '10px 15px', 
-        borderRadius: '20px 20px 20px 5px', 
-        maxWidth: '75%' 
-    }
 };
 
 export default Chat;

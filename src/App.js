@@ -15,16 +15,43 @@ import MentorBooking from "./pages/MentorBooking";
 
 const Nav = () => {
   const { user } = useAuth();
+  const location = useLocation();
+
+  const links = [
+    { to: '/dashboard', label: 'Dashboard' },
+    { to: '/chat', label: 'Chat' },
+    { to: '/groups', label: 'Groups' },
+    { to: '/mentors', label: 'Mentors' },
+    { to: '/diary', label: 'Diary' },
+    { to: '/settings', label: 'Settings' },
+  ];
+
+  const baseLink = 'relative px-5 py-2.5 rounded-full text-sm font-medium transition-colors';
+
   return (
-    <nav className="flex gap-3 p-3 border-b border-gray-200 bg-white shadow-sm">
-      <Link to="/dashboard" className="text-blue-600 hover:text-blue-800 font-medium">Dashboard</Link>
-      <Link to="/chat" className="text-blue-600 hover:text-blue-800 font-medium">Chat</Link>
-      <Link to="/groups" className="text-blue-600 hover:text-blue-800 font-medium">Groups</Link>
-      <Link to="/mentors" className="text-blue-600 hover:text-blue-800 font-medium">Mentors</Link>
-      <Link to="/diary" className="text-blue-600 hover:text-blue-800 font-medium">Diary</Link>
-      <Link to="/settings" className="text-blue-600 hover:text-blue-800 font-medium">Settings</Link>
-      <div className="ml-auto">
-        {!user && <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">Login</Link>}
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-40 mb-10">
+      <div className="flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-full bg-white/70 backdrop-blur-xl border border-white/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)]">
+        
+        {links.map(l => {
+          const active = location.pathname === l.to;
+          return (
+            <Link
+              key={l.to}
+              to={l.to}
+              className={`${baseLink} ${active ? 'bg-black text-white shadow-md' : 'text-gray-700 hover:bg-gray-900/5 hover:text-gray-900'}`}
+            >
+              {l.label}
+            </Link>
+          );
+        })}
+        {!user && (
+          <Link
+            to="/login"
+            className={`${baseLink} bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow hover:opacity-90`}
+          >
+            Login
+          </Link>
+        )}
       </div>
     </nav>
   );
