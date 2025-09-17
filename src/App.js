@@ -14,6 +14,7 @@ import Settings from "./pages/Settings";
 import Landing from "./pages/Landing";
 import MentorList from "./pages/MentorList";
 import MentorBooking from "./pages/MentorBooking";
+import MindscapeGenerator from "./pages/MindscapeGenerator";
 
 const Nav = () => {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ const Nav = () => {
     { to: '/dashboard', label: 'Dashboard' },
     { to: '/chat', label: 'Chat' },
     { to: '/groups', label: 'Groups' },
+    { to: '/mindscape', label: 'Creative Therapy' },
     { to: '/mentors', label: 'Mentors' },
     { to: '/diary', label: 'Diary' },
     { to: '/settings', label: 'Settings' },
@@ -107,6 +109,7 @@ function App() {
         <Route path="/settings" element={<ProtectedRoute><SettingsWithSignOut /></ProtectedRoute>} />
         <Route path="/mentors" element={<ProtectedRoute><MentorList /></ProtectedRoute>} />
         <Route path="/mentors/:mentorId" element={<ProtectedRoute><MentorBooking /></ProtectedRoute>} />
+        <Route path="/mindscape" element={<ProtectedRoute><MindscapeGenerator /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
