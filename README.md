@@ -1,4 +1,4 @@
-# MindSync 🧠✨
+# Aspira 🧠✨
 
 MindSync is a comprehensive mental health companion web application designed specifically for Indian users. It combines AI-powered conversations, mentor booking, digital journaling, and wellness tracking to provide holistic mental health support.
 
