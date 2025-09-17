@@ -6,6 +6,8 @@ import { useAuth } from "./auth";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 import Groups from "./pages/Groups";
+import GroupListPage from "./pages/GroupListPage";
+import ChatRoomPage from "./pages/ChatRoomPage";
 import Checkins from "./pages/Checkins";
 import Diary from "./pages/Diary";
 import Settings from "./pages/Settings";
@@ -98,7 +100,8 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-        <Route path="/groups" element={<ProtectedRoute><Groups /></ProtectedRoute>} />
+        <Route path="/groups" element={<ProtectedRoute><GroupListPage /></ProtectedRoute>} />
+        <Route path="/groups/:groupId" element={<ProtectedRoute><ChatRoomPage /></ProtectedRoute>} />
         <Route path="/checkins" element={<ProtectedRoute><Checkins /></ProtectedRoute>} />
         <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><SettingsWithSignOut /></ProtectedRoute>} />
