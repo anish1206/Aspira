@@ -95,10 +95,14 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   const location = useLocation();
+  const showNav = location.pathname !== "/login" && location.pathname !== "/";
+  const isDashboard = location.pathname === "/dashboard";
+  
   return (
     <div className="min-h-screen bg-gray-50">
-      {location.pathname !== "/login" && location.pathname !== "/" && <Nav />}
-      <Routes>
+      {showNav && <Nav />}
+      <div className={showNav && !isDashboard ? "pt-20" : ""}>
+        <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
@@ -113,6 +117,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </div>
     </div>
   );
 }

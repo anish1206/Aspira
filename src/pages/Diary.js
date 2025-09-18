@@ -541,76 +541,84 @@ export default function Diary() {
   }
 
   return (
-    <div className="diary-container">
-      <div className="diary-header">
-        <h1>My Diary</h1>
-        <p className="current-date">{getCurrentDate()}</p>
+    <div className="relative min-h-[calc(100vh-80px)] overflow-hidden">
+      {/* Background gradients */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-32 -left-32 w-[520px] h-[520px] rounded-full opacity-60" style={{background: 'radial-gradient(circle, #0f2027 0%, #203a43 40%, rgba(44,83,100,0.25) 70%, transparent 100%)'}} />
+        <div className="absolute top-1/3 -right-40 w-[560px] h-[560px] rounded-full opacity-80" style={{background: 'radial-gradient(circle, #b91c1c 0%, #dc2626 25%, #f97316 45%, #fbbf24 65%, rgba(251,191,36,0.25) 80%, transparent 100%)'}} />
       </div>
 
-      <div className="diary-tabs">
-        <button 
-          className={`tab-button ${activeTab === "journal" ? "active" : ""}`}
-          onClick={() => setActiveTab("journal")}
-        >
-          📝 Journal
-        </button>
-        <button 
-          className={`tab-button ${activeTab === "intentions" ? "active" : ""}`}
-          onClick={() => setActiveTab("intentions")}
-        >
-          ✨ Intentions
-        </button>
-        <button 
-          className={`tab-button ${activeTab === "tasks" ? "active" : ""}`}
-          onClick={() => setActiveTab("tasks")}
-        >
-          ✅ Tasks
-        </button>
-        <button 
-          className={`tab-button ${activeTab === "prompts" ? "active" : ""}`}
-          onClick={() => setActiveTab("prompts")}
-        >
-          🎯 Prompts
-        </button>
-      </div>
+      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-10 pb-24">
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-light leading-tight text-foreground mb-2">
+            My <span className="font-semibold">Diary</span>
+          </h1>
+          <p className="text-muted-foreground">{getCurrentDate()}</p>
+        </div>
 
-      {/* Journal Tab */}
-      {activeTab === "journal" && (
-        <div className="tab-content">
-          <div className="journal-section">
-            <h3>Today's Thoughts</h3>
-            
-            {/* Drawing Tools */}
-            <div className="drawing-tools">
-              <div className="tool-group">
-                <button 
-                  className={`tool-button ${drawingMode === "draw" ? "active" : ""}`}
-                  onClick={() => {
-                    setDrawingMode("draw");
-                    resetCanvasContext();
-                  }}
-                >
-                  ✏️ Draw
-                </button>
-                <button 
-                  className={`tool-button ${drawingMode === "text" ? "active" : ""}`}
-                  onClick={() => {
-                    setDrawingMode("text");
-                    resetCanvasContext();
-                  }}
-                >
-                  🔤 Text
-                </button>
-                <button 
-                  className={`tool-button ${drawingMode === "eraser" ? "active" : ""}`}
-                  onClick={() => {
-                    setDrawingMode("eraser");
-                    resetCanvasContext();
-                  }}
-                >
-                  🧽 Eraser
-                </button>
+        {/* Modern tab navigation */}
+        <div className="flex gap-2 mb-8 p-1 bg-white/60 backdrop-blur-xl rounded-2xl border border-white/40 w-fit">
+          {[
+            { key: "journal", label: "📝 Journal", desc: "Thoughts & drawings" },
+            { key: "intentions", label: "✨ Intentions", desc: "Set your goals" },
+            { key: "tasks", label: "✅ Tasks", desc: "Daily to-dos" },
+            { key: "prompts", label: "🎯 Prompts", desc: "Guided reflection" }
+          ].map(tab => (
+            <button 
+              key={tab.key}
+              className={`px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                activeTab === tab.key 
+                  ? "bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow-md" 
+                  : "text-gray-700 hover:bg-white/50"
+              }`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              <div className="text-center">
+                <div>{tab.label}</div>
+                <div className="text-xs opacity-75 mt-1">{tab.desc}</div>
               </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Journal Tab */}
+        {activeTab === "journal" && (
+          <div className="relative overflow-hidden rounded-2xl p-[1px] mb-6">
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/30 via-orange-300/30 to-pink-300/30 opacity-50 blur-sm" />
+            <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl p-6 border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
+              <h3 className="text-xl font-semibold text-foreground mb-6">Today's Thoughts</h3>
+              
+              {/* Drawing Tools */}
+              <div className="flex flex-wrap gap-4 mb-6 p-4 bg-white/50 rounded-xl border border-white/40">
+                <div className="flex gap-2">
+                  <button 
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${drawingMode === "draw" ? "bg-yellow-400 text-white shadow-md" : "bg-white/60 text-gray-700 hover:bg-white/80"}`}
+                    onClick={() => {
+                      setDrawingMode("draw");
+                      resetCanvasContext();
+                    }}
+                  >
+                    ✏️ Draw
+                  </button>
+                  <button 
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${drawingMode === "text" ? "bg-yellow-400 text-white shadow-md" : "bg-white/60 text-gray-700 hover:bg-white/80"}`}
+                    onClick={() => {
+                      setDrawingMode("text");
+                      resetCanvasContext();
+                    }}
+                  >
+                    🔤 Text
+                  </button>
+                  <button 
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${drawingMode === "eraser" ? "bg-yellow-400 text-white shadow-md" : "bg-white/60 text-gray-700 hover:bg-white/80"}`}
+                    onClick={() => {
+                      setDrawingMode("eraser");
+                      resetCanvasContext();
+                    }}
+                  >
+                    🧽 Eraser
+                  </button>
+                </div>
               
               <div className="tool-group">
                 <span className="current-mode">
@@ -911,6 +919,7 @@ export default function Diary() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
