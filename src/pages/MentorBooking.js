@@ -106,117 +106,101 @@ const MentorBooking = () => {
   // --- Render Logic ---
 
   if (loading) {
-    return <div style={styles.container}><p>Loading mentor details...</p></div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-lg">Loading mentor details...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div style={styles.container}><p style={styles.errorText}>{error}</p></div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-red-300 text-lg">{error}</div>
+      </div>
+    );
   }
 
   if (!mentorData || !availabilityData) {
-    return <div style={styles.container}><p>No mentor data available.</p></div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white text-lg">No mentor data available.</div>
+      </div>
+    );
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.profileSection}>
-        <img src={mentorData.photoURL} alt={mentorData.name} style={styles.profileImage} />
-        <h1>{mentorData.name}</h1>
-        <p style={styles.specialties}>Specialties: {mentorData.specialties.join(', ')}</p>
-        <p>{mentorData.bio}</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Profile Section */}
+        <div className="bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 p-8 mb-8 text-center">
+          <div className="w-32 h-32 rounded-full bg-black flex items-center justify-center mx-auto mb-6">
+            <span className="text-5xl text-white">👤</span>
+          </div>
+          <h1 className="text-4xl font-bold text-white mb-4">{mentorData.name}</h1>
+          <div className="flex flex-wrap justify-center gap-2 mb-4">
+            {mentorData.specialties && mentorData.specialties.map((specialty, index) => (
+              <span
+                key={index}
+                className="px-3 py-1 bg-purple-500/30 backdrop-blur-sm border border-purple-400/50 rounded-full text-purple-200 text-sm font-medium"
+              >
+                {specialty}
+              </span>
+            ))}
+          </div>
+          <p className="text-purple-200 text-lg leading-relaxed max-w-2xl mx-auto">{mentorData.bio}</p>
+        </div>
 
-      <div style={styles.slotsSection}>
-        <h2>Available Sessions</h2>
-        {availabilityData.slots && availabilityData.slots.length > 0 ? (
-          availabilityData.slots.map((slot, index) => {
-            const startTime = new Date(slot.startTime.seconds * 1000);
-            const endTime = new Date(slot.endTime.seconds * 1000);
-            
-            return (
-              <div key={index} style={styles.slotCard}>
-                <div style={styles.slotTime}>
-                  <p><strong>Date:</strong> {startTime.toLocaleDateString()}</p>
-                  <p>
-                    <strong>Time:</strong>{' '}
-                    {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -{' '}
-                    {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-                <button
-                  style={slot.isBooked || bookingStatus.loading ? styles.bookedButton : styles.bookButton}
-                  onClick={() => handleBookNow(slot)}
-                  disabled={slot.isBooked || bookingStatus.loading}
-                >
-                  {bookingStatus.loading ? 'Booking...' : (slot.isBooked ? 'Booked' : 'Book Now')}
-                </button>
-              </div>
-            );
-          })
-        ) : (
-          <p>This mentor has no available sessions at the moment.</p>
-        )}
+        {/* Sessions Section */}
+        <div className="bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 p-8">
+          <h2 className="text-3xl font-bold text-white mb-6 text-center">Available Sessions</h2>
+          {availabilityData.slots && availabilityData.slots.length > 0 ? (
+            <div className="space-y-4">
+              {availabilityData.slots.map((slot, index) => {
+                const startTime = new Date(slot.startTime.seconds * 1000);
+                const endTime = new Date(slot.endTime.seconds * 1000);
+                
+                return (
+                  <div key={index} className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/10 transition-all duration-300">
+                    <div className="text-white">
+                      <p className="text-lg font-semibold mb-1">
+                        📅 {startTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                      </p>
+                      <p className="text-purple-200">
+                        🕐 {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <button
+                      className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 min-w-[120px] ${
+                        slot.isBooked || bookingStatus.loading
+                          ? 'bg-gray-500/50 text-gray-300 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg hover:shadow-xl'
+                      }`}
+                      onClick={() => handleBookNow(slot)}
+                      disabled={slot.isBooked || bookingStatus.loading}
+                    >
+                      {bookingStatus.loading ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <span>Booking...</span>
+                        </div>
+                      ) : (slot.isBooked ? 'Booked ✓' : 'Book Now')}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📅</div>
+              <p className="text-white text-xl mb-2">No available sessions</p>
+              <p className="text-purple-200">This mentor has no available sessions at the moment. Check back soon!</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
-};
-
-// --- Basic CSS-in-JS for Styling ---
-
-const styles = {
-  container: {
-    padding: '20px',
-    maxWidth: '800px',
-    margin: 'auto',
-  },
-  profileSection: {
-    textAlign: 'center',
-    marginBottom: '40px',
-  },
-  profileImage: {
-    width: '150px',
-    height: '150px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-  },
-  specialties: {
-    color: '#555',
-    fontStyle: 'italic',
-  },
-  slotsSection: {
-    marginTop: '20px',
-  },
-  slotCard: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '15px',
-    border: '1px solid #eee',
-    borderRadius: '8px',
-    marginBottom: '10px',
-  },
-  slotTime: {
-    margin: 0,
-  },
-  bookButton: {
-    padding: '10px 20px',
-    backgroundColor: '#007bff',
-    color: 'white',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  bookedButton: {
-    padding: '10px 20px',
-    backgroundColor: '#ccc',
-    color: '#666',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'not-allowed',
-  },
-  errorText: {
-    color: 'red',
-  },
 };
 
 export default MentorBooking;

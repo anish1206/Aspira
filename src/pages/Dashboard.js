@@ -16,7 +16,7 @@ const features = [
     )
   },
     {
-    title: "AI Chat",
+    title: "AI Companion",
     description: "Continue your supportive conversation.",
     to: "/chat",
     icon: (

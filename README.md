@@ -1,23 +1,279 @@
 # Aspira 🧠✨
 
-MindSync is a comprehensive mental health companion web application designed specifically for Indian users. It combines AI-powered conversations, mentor booking, digital journaling, and wellness tracking to provide holistic mental health support.
+> A comprehensive mental health companion platform designed to support your wellness journey with AI-powered conversations, mentorship, and mindful tools.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
+[![Firebase](https://img.shields.io/badge/Firebase-12.1.0-orange.svg)](https://firebase.google.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC.svg)](https://tailwindcss.com/)
 
 ## 🌟 Features
 
-### 💬 AI Mental Health Companion
-- Powered by Google's Gemini AI with natural Hinglish support
-- Culturally relevant conversations with Indian context (Bollywood, cricket, family life, festivals)
-- Empathetic, supportive, and non-judgmental responses
-- Real-time chat interface with conversation history
+### 🤖 AI Mental Health Companion
+- **Powered by Google Gemini AI** with culturally-aware responses
+- **Real-time chat interface** with conversation history
+- **Empathetic conversations** designed for mental health support
+- **Privacy-focused** with secure data handling
 
-### 🎯 Mentor Booking System
-- Browse and book sessions with qualified mental health mentors
-- Integrated Google Meet video conferencing
-- Automatic calendar event creation
-- Email confirmations with session details
-- Real-time availability management
+### 👥 Mentor Booking System
+- **Browse qualified mentors** with specialized expertise
+- **Book 1:1 sessions** with integrated scheduling
+- **Video conferencing support** through Google Meet for remote sessions
+- **Automated email confirmations** and calendar integration
 
-### 📖 Digital Diary & Wellness Tracking
+### 📖 Digital Wellness Journal
+- **Interactive drawing canvas** for creative expression
+- **Mood tracking** with visual charts and insights
+- **Gratitude prompts** and reflection exercises
+- **Daily intentions** and task management
+- **Private entries** with local storage
+
+### 🎨 Creative Therapy Tools
+- **Mindscape Generator** - AI-powered visual therapy
+- **Drawing and text tools** for emotional expression
+- **Customizable prompts** for guided reflection
+
+### 👫 Support Groups
+- **Community groups** for shared experiences
+- **Topic-based discussions** (anxiety, stress, sleep, etc.)
+- **Peer support network** with moderated spaces
+- **Group chat functionality** with real-time messaging
+
+### 🎯 Mood Check-ins
+- **Quick daily assessments** with visual mood tracking
+- **Progress insights** and trend analysis
+- **Personalized recommendations** based on patterns
+- **Historical data** for long-term wellness tracking
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 16+ 
+- Firebase account
+- Google Gemini API key
+- Git
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/anish1206/Aspira.git
+   cd Aspira
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   
+   Create a `.env` file in the root directory:
+   ```env
+   # Firebase Configuration
+   REACT_APP_FIREBASE_API_KEY=your_firebase_api_key
+   REACT_APP_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+   REACT_APP_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   REACT_APP_FIREBASE_APP_ID=your_app_id
+   REACT_APP_FIREBASE_MEASUREMENT_ID=your_measurement_id
+   
+   # Google Gemini API
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
+
+4. **Set up Firebase**
+   - Create a new Firebase project
+   - Enable Authentication (Email/Password and Google)
+   - Enable Firestore Database
+   - Configure hosting (optional)
+
+5. **Start development server**
+   ```bash
+   npm start
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🏗️ Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── Header.js       # Navigation header
+│   └── MainContent.js  # Landing page content
+├── pages/              # Main application pages
+│   ├── Landing.js      # Landing page with hero section
+│   ├── Dashboard.js    # User dashboard
+│   ├── Chat.js         # AI chat interface
+│   ├── Diary.js        # Digital journal with drawing
+│   ├── Groups.js       # Support groups
+│   ├── MentorList.js   # Mentor directory
+│   ├── MentorBooking.js # Session booking
+│   ├── Settings.js     # User preferences
+│   └── Checkins.js     # Mood tracking
+├── api/                # Serverless functions
+│   ├── askGemini.js    # AI chat backend
+│   ├── generateMindscape.js # Visual therapy AI
+│   └── bookSession.js  # Mentor booking logic
+├── auth.js             # Authentication context
+├── firebase.js         # Firebase configuration
+└── App.js              # Main application component
+```
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **React 19.1.1** - Modern UI library with hooks
+- **React Router 6.30.1** - Client-side routing
+- **Tailwind CSS** - Utility-first styling
+- **Custom CSS** - Glass morphism and animations
+
+### Backend & Services
+- **Firebase Auth** - User authentication
+- **Firestore** - NoSQL database
+- **Google Gemini AI** - Conversational AI
+- **Vercel Functions** - Serverless API endpoints
+
+### Development Tools
+- **React Scripts 5.0** - Build tooling
+- **ESLint** - Code quality
+- **Firebase CLI** - Deployment
+
+## 🎨 Design System
+
+### Color Palette
+- **Primary**: Yellow/Orange gradients (#816bff to #37b6ff)
+- **Background**: Radial gradients with glass morphism
+- **Text**: High contrast dark/light themes
+- **Accents**: Subtle borders and shadows
+
+### Typography
+- **Headings**: Light to bold weight contrast
+- **Body**: Clean, readable sans-serif
+- **Interactive**: Medium weight with hover states
+
+### Components
+- **Glass morphism cards** with backdrop blur
+- **Gradient borders** and subtle animations
+- **Floating navigation** with pill-shaped design
+- **Responsive grid layouts**
+
+## 📱 API Endpoints
+
+### `/api/askGemini`
+**POST** - AI Chat Conversation
+```javascript
+{
+  "history": [{"role": "user", "parts": [{"text": "previous message"}]}],
+  "message": "current user message"
+}
+```
+
+### `/api/generateMindscape`
+**POST** - Creative Therapy Visualization
+```javascript
+{
+  "userInput": "I feel anxious about exams"
+}
+```
+
+### `/api/bookSession`
+**POST** - Mentor Session Booking
+```javascript
+{
+  "mentorId": "mentor_id",
+  "date": "2025-01-15",
+  "time": "14:00",
+  "userEmail": "user@example.com"
+}
+```
+
+## 🔐 Security & Privacy
+
+- **Environment variables** for sensitive API keys
+- **Firebase security rules** for data protection
+- **CORS configuration** for API endpoints
+- **User authentication** required for all features
+- **Local storage** for sensitive journal data
+
+## 🚀 Deployment
+
+### Vercel
+```bash
+vercel --prod
+```
+
+### Environment Setup
+Ensure all environment variables are configured in your deployment platform.
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Here's how to get started:
+
+1. **Fork the repository**
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Make your changes** and commit
+   ```bash
+   git commit -m 'Add amazing feature'
+   ```
+4. **Push to your branch**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+5. **Open a Pull Request**
+
+### Contribution Guidelines
+- Follow the existing code style
+- Write clear commit messages
+- Add tests for new features
+- Update documentation as needed
+- Ensure responsive design compatibility
+
+## 📋 Roadmap
+
+- [ ] **Mobile app** (React Native)
+- [ ] **AI therapist scheduling** 
+- [ ] **Crisis intervention features**
+- [ ] **Multi-language support**
+- [ ] **Offline functionality**
+- [ ] **Advanced analytics dashboard**
+- [ ] **Integration with wearables**
+- [ ] **Family/caregiver features**
+
+## 🐛 Known Issues
+
+- Canvas drawing may have performance issues on older devices
+- Large journal entries may impact load times
+- AI responses occasionally need retry
+
+## 📞 Support
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/anish1206/Aspira/issues)
+- **Email**: aigen1344@gmail.com
+- **Documentation**: [Wiki](https://github.com/anish1206/Aspira/wiki)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Google Gemini AI** for conversational intelligence
+- **Firebase** for backend infrastructure
+- **Tailwind CSS** for styling framework
+- **React community** for excellent tooling
+- **Mental health professionals** for guidance and validation
+
+---
+
+**Made with ❤️ for mental wellness**
+
+*Aspira is not a substitute for professional mental health care. If you're experiencing a mental health crisis, please contact your local emergency services or a mental health professional immediately.*
 - **Daily Intentions**: Set and track wellness-focused goals
 - **Task Management**: Organize self-care and daily activities
 - **Gratitude Journaling**: Practice mindfulness with guided prompts
@@ -31,8 +287,7 @@ MindSync is a comprehensive mental health companion web application designed spe
 
 ## 🚀 Live Demo
 
-- **Production**: [https://mindsync.vercel.app](https://mindsync.vercel.app)
-- **Firebase Hosting**: [https://genai2505.web.app](https://genai2505.web.app)
+- **Production**: [https://aspira.vercel.app](https://aspira.vercel.app)
 
 ## 🛠️ Tech Stack
 
@@ -75,8 +330,8 @@ RESEND_API_KEY=your_resend_api_key
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/anish1206/MindSync.git
-cd MindSync
+git clone https://github.com/anish1206/Aspira.git
+cd Aspira
 ```
 
 ### 2. Install dependencies

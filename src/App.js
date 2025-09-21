@@ -64,15 +64,18 @@ const Nav = () => {
 const SettingsWithSignOut = () => {
   const { user, signOutUser } = useAuth();
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       <Settings />
       {user && (
-        <div className="mt-6">
+        <div className="fixed bottom-8 right-8">
           <button 
             onClick={signOutUser} 
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-md border border-white/20"
           >
-            Sign Out
+            <span className="flex items-center space-x-2">
+              <span>🚪</span>
+              <span>Sign Out</span>
+            </span>
           </button>
         </div>
       )}
