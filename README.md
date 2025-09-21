@@ -2,7 +2,6 @@
 
 > A comprehensive mental health companion platform designed to support your wellness journey with AI-powered conversations, mentorship, and mindful tools.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-12.1.0-orange.svg)](https://firebase.google.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC.svg)](https://tailwindcss.com/)
@@ -251,11 +250,6 @@ We welcome contributions from the community! Here's how to get started:
 - Large journal entries may impact load times
 - AI responses occasionally need retry
 
-## 📞 Support
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/anish1206/Aspira/issues)
-- **Email**: aigen1344@gmail.com
-- **Documentation**: [Wiki](https://github.com/anish1206/Aspira/wiki)
 
 ## 📄 License
 
@@ -287,7 +281,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🚀 Live Demo
 
-- **Production**: [https://aspira.vercel.app](https://aspira.vercel.app)
+- **Production**: [https://mindsync-web.vercel.app/](https://mindsync-web.vercel.app/)
 
 ## 🛠️ Tech Stack
 
