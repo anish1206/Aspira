@@ -2,7 +2,6 @@
 
 > A comprehensive mental health companion platform designed to support your wellness journey with AI-powered conversations, mentorship, and mindful tools.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-12.1.0-orange.svg)](https://firebase.google.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC.svg)](https://tailwindcss.com/)
@@ -135,11 +134,13 @@ src/
 - **Firestore** - NoSQL database
 - **Google Gemini AI** - Conversational AI
 - **Vercel Functions** - Serverless API endpoints
+- **Email**: Resend API
+- **Calendar**: Google Calendar API
+- **Video**: Google Meet integration
 
 ### Development Tools
 - **React Scripts 5.0** - Build tooling
 - **ESLint** - Code quality
-- **Firebase CLI** - Deployment
 
 ## 🎨 Design System
 
@@ -237,7 +238,6 @@ We welcome contributions from the community! Here's how to get started:
 ## 📋 Roadmap
 
 - [ ] **Mobile app** (React Native)
-- [ ] **AI therapist scheduling** 
 - [ ] **Crisis intervention features**
 - [ ] **Multi-language support**
 - [ ] **Offline functionality**
@@ -251,15 +251,6 @@ We welcome contributions from the community! Here's how to get started:
 - Large journal entries may impact load times
 - AI responses occasionally need retry
 
-## 📞 Support
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/anish1206/Aspira/issues)
-- **Email**: aigen1344@gmail.com
-- **Documentation**: [Wiki](https://github.com/anish1206/Aspira/wiki)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -273,7 +264,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for mental wellness**
 
-*Aspira is not a substitute for professional mental health care. If you're experiencing a mental health crisis, please contact your local emergency services or a mental health professional immediately.*
 - **Daily Intentions**: Set and track wellness-focused goals
 - **Task Management**: Organize self-care and daily activities
 - **Gratitude Journaling**: Practice mindfulness with guided prompts
@@ -287,67 +277,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🚀 Live Demo
 
-- **Production**: [https://aspira.vercel.app](https://aspira.vercel.app)
+- **Production**: [https://mindsync-web.vercel.app/](https://mindsync-web.vercel.app/)
 
-## 🛠️ Tech Stack
 
-- **Frontend**: React 19, React Router, Tailwind CSS
-- **Backend**: Firebase (Authentication, Firestore, Hosting)
-- **AI**: Google Gemini 2.5 Pro API
-- **APIs**: Vercel Serverless Functions
-- **Email**: Resend API
-- **Calendar**: Google Calendar API
-- **Video**: Google Meet integration
-
-## 📋 Prerequisites
-
-- Node.js 16+ and npm
-- Firebase account and project
-- Google Cloud Console account (for Gemini API and Calendar API)
-- Resend account (for email notifications)
-
-## ⚙️ Environment Variables
-
-Create a `.env.local` file in the root directory with the following variables:
-
-```env
-# Firebase Configuration
-REACT_APP_FIREBASE_API_KEY=your_firebase_api_key
-REACT_APP_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-REACT_APP_FIREBASE_PROJECT_ID=your_project_id
-REACT_APP_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-REACT_APP_FIREBASE_APP_ID=your_app_id
-
-# Server-side Environment Variables (for Vercel deployment)
-GEMINI_API_KEY=your_gemini_api_key
-FIREBASE_SERVICE_ACCOUNT_KEY=your_firebase_service_account_json
-GOOGLE_SERVICE_ACCOUNT_CREDENTIALS=your_google_service_account_json
-RESEND_API_KEY=your_resend_api_key
-```
-
-## 🚀 Getting Started
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/anish1206/Aspira.git
-cd Aspira
-```
-
-### 2. Install dependencies
-```bash
-npm install
-```
-
-### 3. Set up environment variables
-Create `.env.local` file with the required environment variables (see above)
-
-### 4. Start the development server
-```bash
-npm start
-```
-
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 ## 📝 Available Scripts
 
@@ -367,50 +299,5 @@ It correctly bundles React in production mode and optimizes the build for the be
 ### `npm run eject`
 **Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-## 🚀 Deployment
-
-### Vercel (Recommended)
-1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
-
-### Firebase Hosting
-```bash
-npm run build
-firebase deploy
-```
-
-## 📱 Key Pages & Features
-
-- **Landing Page**: Introduction and getting started
-- **Dashboard**: Overview of wellness metrics and activities
-- **Chat**: AI mental health companion
-- **Mentors**: Browse and book mentor sessions
-- **Diary**: Digital journaling with intentions, tasks, and gratitude
-- **Groups**: Community support features
-- **Settings**: User preferences and account management
-
-## 🔧 API Endpoints
-
-- `/api/askGemini` - AI chat conversations
-- `/api/bookSession` - Mentor session booking
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 💡 Support
-
-For support, email [your-email@domain.com] or create an issue in this repository.
-
----
 
 Made with ❤️ for mental wellness in India 🇮🇳
