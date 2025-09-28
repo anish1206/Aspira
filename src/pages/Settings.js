@@ -147,11 +147,11 @@ export default function Settings() {
           {settingsSections.map((section, index) => (
             <div
               key={index}
-              className="group relative overflow-hidden rounded-2xl p-[1px]"
+              className="group relative overflow-hidden rounded-2xl p-[1px] transition-transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              {/* Subtle gradient border */}
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/30 via-orange-300/30 to-pink-300/30 opacity-50 group-hover:opacity-70 blur-sm transition-opacity" />
-              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl p-6 border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.05)]">
+              {/* Gradient border */}
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/40 via-orange-300/40 to-pink-300/40 opacity-60 group-hover:opacity-80 blur-sm transition-opacity" />
+              <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl p-6 border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.05)] group-hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.15)] transition-shadow">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 text-white flex items-center justify-center">
                     {section.icon}

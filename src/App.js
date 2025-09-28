@@ -64,16 +64,17 @@ const Nav = () => {
 const SettingsWithSignOut = () => {
   const { user, signOutUser } = useAuth();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    // Remove the old bluish gradient wrapper so the Settings page uses the same radial background style as Mentors
+    <div className="min-h-screen relative">
       <Settings />
       {user && (
         <div className="fixed bottom-8 right-8">
-          <button 
-            onClick={signOutUser} 
-            className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-md border border-white/20"
+          <button
+            onClick={signOutUser}
+            className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-medium px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 active:scale-95 border border-white/40 backdrop-blur-sm"
           >
-            <span className="flex items-center space-x-2">
-              <span>🚪</span>
+            <span className="flex items-center gap-2">
+              <span className="text-lg">🚪</span>
               <span>Sign Out</span>
             </span>
           </button>
