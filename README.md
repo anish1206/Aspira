@@ -6,6 +6,11 @@
 [![Firebase](https://img.shields.io/badge/Firebase-12.1.0-orange.svg)](https://firebase.google.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0-38B2AC.svg)](https://tailwindcss.com/)
 
+
+
+https://github.com/user-attachments/assets/533015b4-fa33-48ff-9330-b9c15eb6a55e
+
+
 ## 🌟 Features
 
 ### 🤖 AI Mental Health Companion
