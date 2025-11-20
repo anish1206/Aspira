@@ -54,7 +54,7 @@ const Chat = () => {
         return (
             <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center px-4 text-center bg-background">
                 <h2 className="text-4xl md:text-4xl font-semibold mb-8 tracking-tight text-foreground">
-                    Hello! How you feelin today?
+                    Hello! How you feelin' today?
                 </h2>
                 <div className="w-full max-w-xl relative group">
                     <input
@@ -103,7 +103,7 @@ const Chat = () => {
                 {loading && (
                     <div className="flex justify-start">
                         <div className="px-4 py-3 rounded-2xl bg-muted text-muted-foreground text-sm shadow-sm animate-pulse">
-                            Mindsync is thinking...
+                            Aspira is thinking...
                         </div>
                     </div>
                 )}
