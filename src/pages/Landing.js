@@ -7,31 +7,34 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       {/* Background gradients */}
-      <div className="absolute inset-0">
-        {/* Left gradient - dark teal */}
-        <div 
-          className="absolute top-1/4 left-0 -translate-x-1/2 w-[700px] h-[700px] rounded-full opacity-60 grainy-texture"
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Top-left cool gradient */}
+        <div
+          className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full opacity-40 blur-3xl"
           style={{
-            background: "radial-gradient(circle, #0f2027 0%, #203a43 30%, #2c5364 60%, rgba(44, 83, 100, 0.3) 80%, transparent 100%)"
+            background: "radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, rgba(59, 130, 246, 0.1) 60%, transparent 100%)"
           }}
         ></div>
-        
-        {/* Right gradient - reddish orange */}
-        <div 
-          className="absolute -top-1/2 -right-1/2 translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-80 grainy-texture"
+
+        {/* Upper-right warm glow */}
+        <div
+          className="absolute -top-24 -right-24 w-[500px] h-[500px] rounded-full opacity-40 blur-3xl"
           style={{
-            background: "radial-gradient(circle, #b91c1c 0%, #dc2626 20%, #f97316 40%, #fbbf24 60%, rgba(251, 191, 36, 0.3) 80%, transparent 100%)"
+            background: "radial-gradient(circle, rgba(251, 146, 60, 0.3) 0%, rgba(244, 114, 182, 0.1) 60%, transparent 100%)"
           }}
         ></div>
-        
-        {/* Additional subtle gradient for depth */}
-        <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full opacity-20"
+
+        {/* Bottom-right accent */}
+        <div
+          className="absolute -bottom-32 -right-32 w-[600px] h-[600px] rounded-full opacity-30 blur-3xl"
           style={{
-            background: "radial-gradient(ellipse, rgba(99, 102, 241, 0.3) 0%, rgba(59, 130, 246, 0.2) 50%, transparent 100%)"
+            background: "radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(236, 72, 153, 0.1) 60%, transparent 100%)"
           }}
         ></div>
       </div>
+
+      {/* Grainy texture overlay */}
+      <div className="absolute inset-0 pointer-events-none grainy-texture opacity-20"></div>
 
       <Header />
       <MainContent />
