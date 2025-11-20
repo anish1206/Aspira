@@ -12,6 +12,7 @@
     "@testing-library/user-event": "^13.5.0",
     "firebase": "^12.1.0",
     "firebase-admin": "^12.6.0",
+    "framer-motion": "^12.23.24",
     "googleapis": "^159.0.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
