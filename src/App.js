@@ -21,6 +21,7 @@ import { motion, LayoutGroup } from "framer-motion";
 const Nav = () => {
     const { user } = useAuth();
     const location = useLocation();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
     const links = [
         { to: '/dashboard', label: 'Dashboard' },
@@ -33,39 +34,90 @@ const Nav = () => {
     ];
 
     return (
-        <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-            <div className="flex items-center gap-1 p-1.5 rounded-full backdrop-blur-xl border border-white/20 ring-2 ring-gray-200 bg-white/30">
-                <LayoutGroup>
-                    {links.map(l => {
-                        const active = location.pathname === l.to;
-                        return (
+        <>
+            <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-fit px-4">
+                <div className="flex items-center justify-between md:justify-center gap-1 p-1.5 rounded-full backdrop-blur-xl border border-white/20 ring-2 ring-gray-200 bg-white/30 shadow-sm">
+                    {/* Desktop Nav */}
+                    <div className="hidden md:flex items-center gap-1">
+                        <LayoutGroup>
+                            {links.map(l => {
+                                const active = location.pathname === l.to;
+                                return (
+                                    <Link
+                                        key={l.to}
+                                        to={l.to}
+                                        className={`relative px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-colors duration-300 ${active ? 'text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        {active && (
+                                            <motion.div
+                                                layoutId="active-pill"
+                                                className="absolute inset-0 bg-black rounded-full shadow-sm"
+                                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            />
+                                        )}
+                                        <span className="relative z-10">{l.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </LayoutGroup>
+                    </div>
+
+                    {/* Mobile Nav Toggle */}
+                    <div className="md:hidden flex items-center justify-between w-full px-2">
+                        <span className="font-bold text-lg">Aspira</span>
+                        <button
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                            className="p-2 rounded-full hover:bg-black/5 transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"} />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {!user && (
+                        <div className="hidden md:block ml-2">
                             <Link
-                                key={l.to}
-                                to={l.to}
-                                className={`relative px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-colors duration-300 ${active ? 'text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                                to="/login"
+                                className="relative px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-300 bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow hover:opacity-90"
                             >
-                                {active && (
-                                    <motion.div
-                                        layoutId="active-pill"
-                                        className="absolute inset-0 bg-black rounded-full shadow-sm"
-                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                    />
-                                )}
-                                <span className="relative z-10">{l.label}</span>
+                                Login
                             </Link>
-                        );
-                    })}
-                </LayoutGroup>
-                {!user && (
-                    <Link
-                        to="/login"
-                        className="relative px-4 py-2 rounded-full text-xs md:text-sm font-medium transition-all duration-300 bg-gradient-to-r from-yellow-400 to-orange-400 text-white shadow hover:opacity-90"
-                    >
-                        Login
-                    </Link>
-                )}
-            </div>
-        </nav>
+                        </div>
+                    )}
+                </div>
+            </nav>
+
+            {/* Mobile Menu Overlay */}
+            {isMobileMenuOpen && (
+                <div className="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl pt-24 px-6 md:hidden animate-in slide-in-from-top-10">
+                    <div className="flex flex-col gap-4">
+                        {links.map(l => {
+                            const active = location.pathname === l.to;
+                            return (
+                                <Link
+                                    key={l.to}
+                                    to={l.to}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={`text-xl font-medium py-3 border-b border-gray-100 ${active ? 'text-black' : 'text-gray-500'}`}
+                                >
+                                    {l.label}
+                                </Link>
+                            );
+                        })}
+                        {!user && (
+                            <Link
+                                to="/login"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="mt-4 w-full text-center py-3 rounded-xl bg-black text-white font-medium"
+                            >
+                                Login
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 // Wrapper to show Sign Out button only in Settings page

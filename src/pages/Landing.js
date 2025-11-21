@@ -21,7 +21,7 @@ const Landing = () => {
                         repeat: Infinity,
                         ease: "easeInOut",
                     }}
-                    className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full opacity-80 grainy-texture"
+                    className="absolute -top-8 -left-8 w-24 h-24 md:-top-32 md:-left-32 md:w-[500px] md:h-[500px] rounded-full opacity-80 grainy-texture"
                     style={{
                         background: "radial-gradient(circle, rgba(1, 103, 146, 0.93) 0%, rgba(23, 187, 18, 0.57) 60%, transparent 100%)"
                     }}
@@ -40,7 +40,7 @@ const Landing = () => {
                         ease: "easeInOut",
                         delay: 2,
                     }}
-                    className="absolute -top-24 -right-24 w-[400px] h-[400px] rounded-full opacity-80"
+                    className="absolute -top-8 -right-8 w-24 h-24 md:-top-24 md:-right-24 md:w-[400px] md:h-[400px] rounded-full opacity-80"
                     style={{
                         background: "radial-gradient(circle, rgba(255, 102, 26, 1) 0%, rgba(255, 72, 36, 1) 60%, transparent 100%)"
                     }}

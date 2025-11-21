@@ -19,9 +19,9 @@ export default function Settings() {
             ),
             content: (
                 <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Email</span>
-                        <span className="text-sm font-medium">{user?.email || "Not logged in"}</span>
+                    <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm text-muted-foreground flex-shrink-0">Email</span>
+                        <span className="text-sm font-medium truncate">{user?.email || "Not logged in"}</span>
                     </div>
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">Member since</span>
@@ -131,6 +131,7 @@ export default function Settings() {
 
     return (
         <div className="min-h-[calc(100vh-80px)] bg-background overflow-hidden">
+
             <div className="max-w-4xl mx-auto px-6 pt-10 pb-24">
                 <h1 className="text-4xl md:text-5xl font-light leading-tight text-foreground mb-2">
                     Your <span className="font-semibold">Settings</span>

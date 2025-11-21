@@ -142,7 +142,7 @@ export const MainContent = () => {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="text-6xl md:text-8xl font-pp-editorial font-light text-foreground mb-6 leading-tight"
+                        className="text-5xl md:text-8xl font-pp-editorial font-light text-foreground mb-6 leading-tight"
                     >
                         Trans<i>f</i>orm Yo<i>u</i>r
                         <br />
@@ -155,7 +155,7 @@ export const MainContent = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                        className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
+                        className="text-lg md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
                     >
                         Unlock the power of AI-driven mental health support, connect with caring peers,
                         and track your emotional journey with personalized insights.
@@ -170,11 +170,11 @@ export const MainContent = () => {
                     >
                         <Link
                             to="/login"
-                            className="bg-gradient-to-r from-primary to-blue-600 text-primary-foreground px-10 py-4 rounded-xl text-lg font-medium hover:opacity-90 transition-all duration-200 transform hover:scale-105 shadow-xl"
+                            className="bg-gradient-to-r from-primary to-blue-600 text-primary-foreground px-10 py-4 rounded-xl text-lg font-medium hover:opacity-90 transition-all duration-200 transform hover:scale-105 shadow-xl w-full sm:w-auto text-center"
                         >
                             Start Your Journey
                         </Link>
-                        <button className="text-foreground px-8 py-4 rounded-xl text-lg font-medium border border-border hover:bg-accent transition-all duration-200 backdrop-blur-sm">
+                        <button className="text-foreground px-8 py-4 rounded-xl text-lg font-medium border border-border hover:bg-accent transition-all duration-200 backdrop-blur-sm w-full sm:w-auto">
                             Discover Features
                         </button>
                     </motion.div>
