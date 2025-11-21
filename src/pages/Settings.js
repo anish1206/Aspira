@@ -130,13 +130,26 @@ export default function Settings() {
     ];
 
     return (
-        <div className="min-h-[calc(100vh-80px)] bg-background overflow-hidden">
+        <div className="relative min-h-[calc(100vh-80px)] bg-gradient-to-b from-green-50/50 to-white overflow-hidden">
+            {/* Nature-inspired Background Elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {/* Abstract Tree/Leaf Shapes */}
+                <svg className="absolute top-0 left-0 w-full h-full opacity-[0.03]" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <path d="M0 0 C 30 10 50 30 50 50 C 50 70 30 90 0 100 Z" fill="#059669" />
+                    <path d="M100 0 C 70 10 50 30 50 50 C 50 70 70 90 100 100 Z" fill="#10b981" />
+                </svg>
 
-            <div className="max-w-4xl mx-auto px-6 pt-10 pb-24">
-                <h1 className="text-4xl md:text-5xl font-light leading-tight text-foreground mb-2">
-                    Your <span className="font-semibold">Settings</span>
+                {/* Floating Orbs */}
+                <div className="absolute top-20 left-10 w-64 h-64 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+                <div className="absolute top-20 right-10 w-64 h-64 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+                <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
+            </div>
+
+            <div className="relative z-10 max-w-4xl mx-auto px-6 pt-10 pb-24">
+                <h1 className="text-4xl md:text-5xl font-light leading-tight text-gray-900 mb-2">
+                    Your <span className="font-semibold text-emerald-800">Settings</span>
                 </h1>
-                <p className="text-muted-foreground mb-10">Customize your MindSync experience</p>
+                <p className="text-gray-600 mb-10">Customize your MindSync experience</p>
 
                 <div className="space-y-6">
                     {settingsSections.map((section, index) => (

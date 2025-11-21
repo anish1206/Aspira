@@ -93,10 +93,10 @@ const CustomCursor = () => {
 
     return (
         <motion.div
-            className="fixed top-0 left-0 w-6 h-6 bg-green-800 rounded-full pointer-events-none z-50 shadow-sm border border-white/20"
+            className="fixed top-0 left-0 w-4 h-4 bg-gray-400 rounded-full pointer-events-none z-50 shadow-sm border border-white/20"
             animate={{
-                x: mousePosition.x - 12,
-                y: mousePosition.y - 12,
+                x: mousePosition.x - 8,
+                y: mousePosition.y - 8,
             }}
             transition={{
                 type: "spring",

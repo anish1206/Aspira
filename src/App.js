@@ -51,7 +51,7 @@ const Nav = () => {
                                         {active && (
                                             <motion.div
                                                 layoutId="active-pill"
-                                                className="absolute inset-0 bg-black rounded-full shadow-sm"
+                                                className="absolute inset-0 bg-green-900 rounded-full shadow-sm"
                                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                             />
                                         )}

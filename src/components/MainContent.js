@@ -198,7 +198,7 @@ export const MainContent = () => {
                                 whileInView={{ height: "100%" }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 1.5, ease: "easeInOut" }}
-                                className="hidden md:block absolute inset-y-4 left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-yellow-300 via-orange-300 to-purple-400 opacity-60"
+                                className="hidden md:block absolute inset-y-4 left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-yellow-300 via-orange-300 to-blue-400 opacity-90"
                             ></motion.div>
                             <div className="space-y-14">
                                 {featureItems.map((feature, index) => {
@@ -280,7 +280,7 @@ export const MainContent = () => {
                         >
                             <div className="grid md:grid-cols-2 gap-10 items-center">
                                 <div>
-                                    <h2 className="text-3xl md:text-4xl font-semibold text-foreground">Let’s talk</h2>
+                                    <h2 className="text-3xl md:text-4xl font-semibold text-foreground">Contact Us</h2>
                                     <p className="text-muted-foreground text-lg leading-relaxed mt-4">
                                         Have questions about Aspira, want to partner with us, or need help getting started? Our team is a message away.
                                     </p>

@@ -67,7 +67,7 @@ const Chat = () => {
                         setMessages([]);
                         setStarted(false);
                     }}
-                    className="w-full flex items-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-all shadow-sm font-medium"
+                    className="w-full flex items-center gap-2 px-4 py-3 bg-green-900 text-white rounded-xl hover:opacity-90 transition-all shadow-sm font-medium"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                     New Chat
@@ -83,16 +83,11 @@ const Chat = () => {
                     </div>
                 </div>
             </div>
-
-            <div className="mt-auto pt-4 border-t border-border">
-                {/* Footer removed as requested */}
-            </div>
         </div>
     );
 
     return (
         <ChatLayout sidebar={<SidebarContent />}>
-            {/* Header removed as requested */}
 
             {/* Messages Area */}
             <div
@@ -101,7 +96,7 @@ const Chat = () => {
             >
                 {!started ? (
                     <div className="h-full flex flex-col items-center justify-center text-center space-y-6 pb-20">
-                        <h2 className="text-3xl font-bold tracking-tight">Hello! How you dooin'</h2>
+                        <h2 className="text-3xl font-bold tracking-tight">Hey! </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl w-full px-4">
                             {["Help me plan my day", "I'm feeling anxious", "Let's practice mindfulness", "Tell me a calming story"].map((suggestion, i) => (
                                 <button
@@ -173,7 +168,7 @@ const Chat = () => {
                     <button
                         onClick={handleSend}
                         disabled={loading || !newMessage.trim()}
-                        className="absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-xl bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all active:scale-95"
+                        className="absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-xl bg-green-900 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all active:scale-95"
                         aria-label="Send"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
