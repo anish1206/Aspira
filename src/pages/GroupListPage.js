@@ -148,10 +148,10 @@ export default function GroupListPage() {
                 <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
             </div>
 
-            <div className="relative z-10 p-6 max-w-7xl mx-auto">
+            <div className="relative z-10 p-6 pt-20 max-w-7xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h2 className="text-3xl font-light text-gray-900">Peer Support <span className="font-semibold text-emerald-800">Groups</span></h2>
+                        <h2 className="text-4xl md:text-5xl font-light text-gray-900">Peer Support <span className="font-semibold text-emerald-800">Groups</span></h2>
                         <p className="text-gray-600 mt-1">Find your community and grow together</p>
                     </div>
                 </div>
@@ -172,11 +172,11 @@ export default function GroupListPage() {
                                     className="group relative block rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1"
                                 >
                                     {/* Decorative Gradient Header */}
-                                    <div className={`h-3 w-full bg-gradient-to-r ${gradient}`} />
+                                    <div className={`h-3 w-full bg-green-900`} />
 
                                     <div className="p-6">
                                         <div className="flex items-start justify-between mb-4">
-                                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white shadow-sm transform group-hover:scale-110 transition-transform duration-300`}>
+                                            <div className={`w-12 h-12 rounded-xl bg-green-900 flex items-center justify-center text-white shadow-sm transform group-hover:scale-110 transition-transform duration-300`}>
                                                 {icon}
                                             </div>
                                             <span className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 group-hover:bg-gray-100 transition-colors">
@@ -187,7 +187,7 @@ export default function GroupListPage() {
                                             </span>
                                         </div>
 
-                                        <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                        <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-green-900 transition-colors">
                                             {g.name || g.id}
                                         </h3>
 

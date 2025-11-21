@@ -76,8 +76,27 @@ export default function ChatRoomPage() {
     };
 
     return (
-        <div className="flex flex-col h-[calc(100vh-80px)] bg-background p-4 md:p-6">
-            <div className="max-w-4xl mx-auto w-full flex flex-col h-full">
+        <div className="relative flex flex-col h-[calc(100vh-80px)] bg-gradient-to-b from-green-50/50 to-white overflow-hidden">
+            {/* Nature-inspired Background Elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {/* Abstract Tree/Leaf Shapes */}
+                <svg className="absolute top-10 right-20 w-32 h-32 text-green-200 opacity-30" viewBox="0 0 100 100">
+                    <path d="M50 10 Q60 30 50 50 Q40 30 50 10" fill="currentColor" />
+                    <path d="M50 50 Q70 60 60 80 Q50 70 50 50" fill="currentColor" />
+                    <path d="M50 50 Q30 60 40 80 Q50 70 50 50" fill="currentColor" />
+                </svg>
+                <svg className="absolute bottom-20 left-10 w-40 h-40 text-emerald-200 opacity-20" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" fill="currentColor" />
+                    <circle cx="30" cy="30" r="20" fill="currentColor" opacity="0.5" />
+                </svg>
+
+                {/* Floating Orbs */}
+                <div className="absolute top-20 left-10 w-64 h-64 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+                <div className="absolute top-20 right-10 w-64 h-64 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+                <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
+            </div>
+
+            <div className="relative z-10 max-w-4xl mx-auto w-full flex flex-col h-full px-4 md:px-6 pt-24 pb-4 md:pb-6">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold text-foreground">Group: {groupId}</h2>
                     <div className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">Anonymous Chat</div>

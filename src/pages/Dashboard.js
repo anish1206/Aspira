@@ -2,6 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import InteractiveBranch from '../components/InteractiveBranch';
 
 const features = [
     {
@@ -110,8 +111,9 @@ const CustomCursor = () => {
 
 export default function Dashboard() {
     return (
-        <div className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-gradient-to-b from-green-50/50 to-white cursor-none">
-            <CustomCursor />
+        <div className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-gradient-to-b from-green-50/50 to-white">
+            <InteractiveBranch />
+
             {/* Nature-inspired Background Elements */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 {/* Abstract Tree/Leaf Shapes */}
@@ -134,7 +136,7 @@ export default function Dashboard() {
                     className="mb-12"
                 >
                     <h1 className="text-4xl md:text-5xl font-light leading-tight text-gray-900 mb-2">
-                        Welcome back <span className="font-semibold text-emerald-800">to your sanctuary</span>
+                        Welcome back <span className="font-semibold text-emerald-800">to Aspira</span>
                     </h1>
                     <p className="text-lg text-gray-600 max-w-2xl">
                         A space to grow, reflect, and find your balance.
@@ -187,5 +189,3 @@ export default function Dashboard() {
         </div>
     );
 }
-
-

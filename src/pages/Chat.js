@@ -96,7 +96,7 @@ const Chat = () => {
             >
                 {!started ? (
                     <div className="h-full flex flex-col items-center justify-center text-center space-y-6 pb-20">
-                        <h2 className="text-3xl font-bold tracking-tight">Hey! </h2>
+                        <h2 className="text-3xl font-bold tracking-tight">He<i>y</i> ! </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl w-full px-4">
                             {["Help me plan my day", "I'm feeling anxious", "Let's practice mindfulness", "Tell me a calming story"].map((suggestion, i) => (
                                 <button

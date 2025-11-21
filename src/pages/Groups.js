@@ -37,13 +37,13 @@ const GroupItem = ({ name, members, description, color = "blue" }) => {
 export default function Groups() {
     const groups = [
         {
-            name: "Anxiety Support",
+            name: "Anxiety",
             members: 24,
             description: "A safe space to share experiences and coping strategies for anxiety management.",
             color: "blue"
         },
         {
-            name: "Exam Stress",
+            name: "Exam",
             members: 18,
             description: "Support group for students dealing with academic pressure and exam anxiety.",
             color: "green"

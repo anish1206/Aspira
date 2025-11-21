@@ -130,30 +130,49 @@ const MentorBooking = () => {
     }
 
     return (
-        <div className="min-h-screen bg-background p-6">
-            <div className="max-w-4xl mx-auto">
+        <div className="relative min-h-screen bg-gradient-to-b from-green-50/50 to-white overflow-hidden">
+            {/* Nature-inspired Background Elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {/* Abstract Tree/Leaf Shapes */}
+                <svg className="absolute top-10 right-20 w-32 h-32 text-green-200 opacity-30" viewBox="0 0 100 100">
+                    <path d="M50 10 Q60 30 50 50 Q40 30 50 10" fill="currentColor" />
+                    <path d="M50 50 Q70 60 60 80 Q50 70 50 50" fill="currentColor" />
+                    <path d="M50 50 Q30 60 40 80 Q50 70 50 50" fill="currentColor" />
+                </svg>
+                <svg className="absolute bottom-20 left-10 w-40 h-40 text-emerald-200 opacity-20" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" fill="currentColor" />
+                    <circle cx="30" cy="30" r="20" fill="currentColor" opacity="0.5" />
+                </svg>
+
+                {/* Floating Orbs */}
+                <div className="absolute top-20 left-10 w-64 h-64 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+                <div className="absolute top-20 right-10 w-64 h-64 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+                <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
+            </div>
+
+            <div className="relative z-10 max-w-4xl mx-auto p-6 pt-24">
                 {/* Profile Section */}
-                <div className="bg-card rounded-3xl border border-border p-8 mb-8 text-center shadow-sm">
-                    <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-green-100 p-8 mb-8 text-center shadow-sm">
+                    <div className="w-32 h-32 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-6 border-4 border-white shadow-sm">
                         <span className="text-5xl">👤</span>
                     </div>
-                    <h1 className="text-4xl font-bold text-foreground mb-4">{mentorData.name}</h1>
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">{mentorData.name}</h1>
                     <div className="flex flex-wrap justify-center gap-2 mb-4">
                         {mentorData.specialties && mentorData.specialties.map((specialty, index) => (
                             <span
                                 key={index}
-                                className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-medium"
+                                className="px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-700 text-sm font-medium"
                             >
                                 {specialty}
                             </span>
                         ))}
                     </div>
-                    <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl mx-auto">{mentorData.bio}</p>
+                    <p className="text-gray-600 text-lg leading-relaxed max-w-2xl mx-auto">{mentorData.bio}</p>
                 </div>
 
                 {/* Sessions Section */}
-                <div className="bg-card rounded-3xl border border-border p-8 shadow-sm">
-                    <h2 className="text-3xl font-bold text-foreground mb-6 text-center">Available Sessions</h2>
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-green-100 p-8 shadow-sm">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Available Sessions</h2>
                     {availabilityData.slots && availabilityData.slots.length > 0 ? (
                         <div className="space-y-4">
                             {availabilityData.slots.map((slot, index) => {
@@ -161,26 +180,26 @@ const MentorBooking = () => {
                                 const endTime = new Date(slot.endTime.seconds * 1000);
 
                                 return (
-                                    <div key={index} className="bg-muted/30 rounded-2xl border border-border p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-muted/50 transition-all duration-300">
+                                    <div key={index} className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-green-200 hover:shadow-md transition-all duration-300">
                                         <div>
-                                            <p className="text-lg font-semibold text-foreground mb-1">
+                                            <p className="text-lg font-semibold text-gray-900 mb-1">
                                                 📅 {startTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                             </p>
-                                            <p className="text-muted-foreground">
+                                            <p className="text-gray-500">
                                                 🕐 {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
                                         <button
                                             className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 min-w-[120px] ${slot.isBooked || bookingStatus.loading
-                                                    ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                                                    : 'bg-primary text-primary-foreground hover:opacity-90 shadow-lg'
+                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-200'
                                                 }`}
                                             onClick={() => handleBookNow(slot)}
                                             disabled={slot.isBooked || bookingStatus.loading}
                                         >
                                             {bookingStatus.loading ? (
                                                 <div className="flex items-center space-x-2">
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                                                     <span>Booking...</span>
                                                 </div>
                                             ) : (slot.isBooked ? 'Booked ✓' : 'Book Now')}
@@ -192,8 +211,8 @@ const MentorBooking = () => {
                     ) : (
                         <div className="text-center py-12">
                             <div className="text-6xl mb-4">📅</div>
-                            <p className="text-foreground text-xl mb-2">No available sessions</p>
-                            <p className="text-muted-foreground">This mentor has no available sessions at the moment. Check back soon!</p>
+                            <p className="text-gray-900 text-xl mb-2">No available sessions</p>
+                            <p className="text-gray-500">This mentor has no available sessions at the moment. Check back soon!</p>
                         </div>
                     )}
                 </div>

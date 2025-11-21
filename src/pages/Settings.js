@@ -1,6 +1,7 @@
 // src/pages/Settings.js
 import React, { useState } from "react";
 import { useAuth } from "../auth";
+import InteractiveBranch from "../components/InteractiveBranch";
 
 export default function Settings() {
     const { user } = useAuth();
@@ -131,6 +132,7 @@ export default function Settings() {
 
     return (
         <div className="relative min-h-[calc(100vh-80px)] bg-gradient-to-b from-green-50/50 to-white overflow-hidden">
+            <InteractiveBranch />
             {/* Nature-inspired Background Elements */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 {/* Abstract Tree/Leaf Shapes */}
@@ -145,11 +147,11 @@ export default function Settings() {
                 <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
             </div>
 
-            <div className="relative z-10 max-w-4xl mx-auto px-6 pt-10 pb-24">
+            <div className="relative z-10 max-w-4xl mx-auto px-6 pt-20 pb-24">
                 <h1 className="text-4xl md:text-5xl font-light leading-tight text-gray-900 mb-2">
                     Your <span className="font-semibold text-emerald-800">Settings</span>
                 </h1>
-                <p className="text-gray-600 mb-10">Customize your MindSync experience</p>
+                <p className="text-gray-600 mb-10">Customize your Aspira experience</p>
 
                 <div className="space-y-6">
                     {settingsSections.map((section, index) => (

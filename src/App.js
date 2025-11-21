@@ -36,7 +36,7 @@ const Nav = () => {
     return (
         <>
             <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-fit px-4">
-                <div className="flex items-center justify-between md:justify-center gap-1 p-1.5 rounded-full backdrop-blur-xl border border-white/20 ring-2 ring-gray-200 bg-white/30 shadow-sm">
+                <div className="flex items-center justify-between md:justify-center gap-1 p-1.5 rounded-full backdrop-blur-xl border border-white/20 ring-2 ring-gray-200 bg-white/20 grainy-texture">
                     {/* Desktop Nav */}
                     <div className="hidden md:flex items-center gap-1">
                         <LayoutGroup>
@@ -124,11 +124,10 @@ const Nav = () => {
 const SettingsWithSignOut = () => {
     const { user, signOutUser } = useAuth();
     return (
-        // Remove the old bluish gradient wrapper so the Settings page uses the same radial background style as Mentors
-        <div className="min-h-screen relative">
+        <div className="relative">
             <Settings />
             {user && (
-                <div className="fixed bottom-8 right-8">
+                <div className="relative z-10 max-w-4xl mx-auto px-6 pb-12">
                     <button
                         onClick={signOutUser}
                         className="group flex items-center gap-3 px-6 py-3 rounded-2xl bg-white/90 backdrop-blur-sm text-gray-900 font-medium shadow-sm border border-gray-800 hover:bg-red-50 hover:text-red-600 hover:border-red-200 hover:shadow-md transition-all duration-300 active:scale-95"
@@ -157,12 +156,11 @@ const ProtectedRoute = ({ children }) => {
 function App() {
     const location = useLocation();
     const showNav = location.pathname !== "/login" && location.pathname !== "/";
-    const isDashboard = location.pathname === "/dashboard";
 
     return (
         <div className="min-h-screen bg-gray-50">
             {showNav && <Nav />}
-            <div className={showNav && !isDashboard ? "pt-16" : ""}>
+            <div>
                 <Routes>
                     <Route path="/" element={<Landing />} />
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
