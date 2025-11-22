@@ -147,7 +147,7 @@ export default function Settings() {
                 <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
             </div>
 
-            <div className="relative z-10 max-w-4xl mx-auto px-6 pt-20 pb-24">
+            <div className="relative z-10 max-w-4xl mx-auto px-6 pt-32 pb-24">
                 <h1 className="text-4xl md:text-5xl font-light leading-tight text-gray-900 mb-2">
                     Your <span className="font-semibold text-emerald-800">Settings</span>
                 </h1>

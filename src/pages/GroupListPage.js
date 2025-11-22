@@ -148,7 +148,7 @@ export default function GroupListPage() {
                 <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
             </div>
 
-            <div className="relative z-10 p-6 pt-20 max-w-7xl mx-auto">
+            <div className="relative z-10 p-6 pt-32 max-w-7xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <h2 className="text-4xl md:text-5xl font-light text-gray-900">Peer Support <span className="font-semibold text-emerald-800">Groups</span></h2>
@@ -196,10 +196,6 @@ export default function GroupListPage() {
                                                 {g.description}
                                             </p>
                                         )}
-
-                                        <div className="flex items-center text-xs text-gray-400 font-medium">
-                                            <span>View Community</span>
-                                        </div>
                                     </div>
                                 </Link>
                             );

@@ -128,7 +128,7 @@ export default function Dashboard() {
                 <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
             </div>
 
-            <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-6 pt-10 pb-24 my-10 md:m-14">
+            <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-6 pt-24 pb-24 my-10 md:m-14">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -153,7 +153,7 @@ export default function Dashboard() {
                         <motion.div key={f.title} variants={item}>
                             <Link
                                 to={f.to}
-                                className="group relative block h-full cursor-none"
+                                className="group relative block h-full "
                             >
                                 <div className="relative h-full bg-white rounded-3xl p-8 border border-green-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                                     {/* Hover Gradient Background */}
