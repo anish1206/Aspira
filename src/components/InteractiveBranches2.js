@@ -17,7 +17,7 @@ const NaturalBranch = () => {
                     startY: Math.random() * window.innerHeight * 0.7,
                     endX: fromLeft ? window.innerWidth + 50 : -50,
                     endY: Math.random() * window.innerHeight * 0.7,
-                    duration: 480,
+                    duration: 12,
                     delay: i * 0.5 // Slight delay between birds in a group
                 };
                 newBirds.push(newBird);
