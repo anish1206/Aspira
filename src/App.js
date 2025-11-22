@@ -15,6 +15,7 @@ import Landing from "./pages/Landing";
 import MentorList from "./pages/MentorList";
 import MentorBooking from "./pages/MentorBooking";
 import MindscapeGenerator from "./pages/MindscapeGenerator";
+import Analytics from "./pages/Analytics";
 
 import { motion, LayoutGroup } from "framer-motion";
 
@@ -172,6 +173,7 @@ function App() {
                     <Route path="/settings" element={<ProtectedRoute><SettingsWithSignOut /></ProtectedRoute>} />
                     <Route path="/mentors" element={<ProtectedRoute><MentorList /></ProtectedRoute>} />
                     <Route path="/mentors/:mentorId" element={<ProtectedRoute><MentorBooking /></ProtectedRoute>} />
+                    <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
                     <Route path="/mindscape" element={<ProtectedRoute><MindscapeGenerator /></ProtectedRoute>} />
                     <Route path="/login" element={<Login />} />
                     <Route path="*" element={<Navigate to="/" replace />} />

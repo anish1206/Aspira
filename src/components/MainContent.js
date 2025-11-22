@@ -178,27 +178,52 @@ export const MainContent = () => {
                             Discover Features
                         </button>
                     </motion.div>
+                </div>
 
-                    <section id="features" className="mt-24">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6 }}
+                    style={{
+                        backgroundColor: "#d0fec2ff",
+                        clipPath: "polygon(0 30%, 100% 0, 100% 70%, 0 100%)"
+                    }}
+                    className="mt-24 py-16 px-12 w-screen"
+                >
+                    <svg
+                        viewBox="0 0 1200 120"
+                        className="w-full h-auto"
+                        style={{ transform: "rotate(-2deg)", overflow: "visible" }}
+                    >
+                        <text
+                            x="50%"
+                            y="60%"
+                            textAnchor="middle"
+                            className="text-4xl md:text-5xl font-bold tracking-widest"
+                            style={{
+                                fill: "#061c0dff",
+                                stroke: "#061c0dff",
+                                strokeWidth: "1",
+                                fontSize: "clamp(2rem, 4vw, 3rem)",
+                                fontWeight: "bold",
+                                letterSpacing: "0.12em"
+                            }}
                         >
-                            <h2 className="text-3xl md:text-4xl font-semibold text-foreground text-center">Everything you need to feel supported</h2>
-                            <p className="text-muted-foreground text-center mt-4 max-w-2xl mx-auto">
-                                Move through your mental wellness journey with smart technology, uplifting people, and insights that keep you on track.
-                            </p>
-                        </motion.div>
+                            Everything  you  need  to  feel supported
+                        </text>
+                    </svg>
+                </motion.div>
 
+                <div className="max-w-4xl mx-auto text-center w-full">
+                    <section id="features" className="mt-24">
                         <div className="relative mt-16 max-w-5xl mx-auto">
                             <motion.div
                                 initial={{ height: 0 }}
                                 whileInView={{ height: "100%" }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 1.5, ease: "easeInOut" }}
-                                className="hidden md:block absolute inset-y-4 left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-yellow-300 via-orange-300 to-blue-400 opacity-90"
+                                className="hidden md:block absolute inset-y-4 left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-green-300 via-green-600 to-green-900 opacity-90"
                             ></motion.div>
                             <div className="space-y-14">
                                 {featureItems.map((feature, index) => {
@@ -219,7 +244,7 @@ export const MainContent = () => {
                                                         whileInView={{ scale: 1 }}
                                                         viewport={{ once: true }}
                                                         transition={{ delay: 0.2 + (index * 0.2), type: "spring" }}
-                                                        className="w-4 h-4 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 border-4 border-white shadow-lg"
+                                                        className="w-4 h-4 rounded-full bg-gradient-to-br from-green-400 to-green-900 border-4 border-white shadow-lg"
                                                     ></motion.span>
                                                     {index !== featureItems.length - 1 && (
                                                         <span className="flex-1 w-[2px] bg-gradient-to-b from-yellow-200 via-orange-200 to-pink-200"></span>
@@ -354,6 +379,6 @@ export const MainContent = () => {
                     </div>
                 </div>
             </footer>
-        </div>
+        </div >
     );
 };
