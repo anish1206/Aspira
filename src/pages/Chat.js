@@ -311,8 +311,8 @@ const Chat = () => {
                                         {msg.text}
                                     </div>
                                     {msg.role === 'user' && (
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex-shrink-0 flex items-center justify-center mt-1 text-white text-xs font-bold">
-                                            U
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex-shrink-0 flex items-center justify-center mt-1 text-white text-xs font-bold">
+                                            {msg.user}
                                         </div>
                                     )}
                                 </div>
@@ -360,7 +360,7 @@ const Chat = () => {
                     </div>
                 </div>
             </div>
-        </ChatLayout>
+        </ChatLayout >
     );
 };
 

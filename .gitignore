@@ -24,3 +24,19 @@ yarn-debug.log*
 yarn-error.log*
 
 .vercel
+.firebase
+.firebaserc
+
+# Firebase cache
+.firebase/
+
+# Debug logs
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*.log
+
+# Security keys
+*.pem
+*.key
+*.p12

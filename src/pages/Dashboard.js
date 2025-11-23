@@ -2,6 +2,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useAuth } from '../auth';
 import InteractiveBranch from '../components/InteractiveBranch';
 
 const features = [
@@ -109,9 +112,112 @@ const CustomCursor = () => {
     );
 };
 
+const DailyAffirmation = ({ onClose }) => {
+    const affirmations = [
+        "You are capable of amazing things.",
+        "Every day is a fresh start.",
+        "You are stronger than you know.",
+        "Believe in yourself and all that you are.",
+        "Your potential is endless.",
+        "Small steps lead to big changes.",
+        "You are worthy of happiness and love.",
+        "Today is a gift, that's why it's called the present.",
+        "You have the power to create change.",
+        "Trust the process and be patient with yourself."
+    ];
+
+    const [quote, setQuote] = React.useState("");
+
+    React.useEffect(() => {
+        const randomQuote = affirmations[Math.floor(Math.random() * affirmations.length)];
+        setQuote(randomQuote);
+    }, []);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+        >
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="bg-white/90 backdrop-blur-md rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/50 relative overflow-hidden text-center"
+            >
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
+
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <div className="mb-6 text-4xl">✨</div>
+
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">Daily Affirmation</h3>
+
+                <p className="text-xl text-emerald-800 font-medium italic mb-8 leading-relaxed">
+                    "{quote}"
+                </p>
+
+                <button
+                    onClick={onClose}
+                    className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                >
+                    I Receive This
+                </button>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 export default function Dashboard() {
+    const { user } = useAuth();
+    const [showAffirmation, setShowAffirmation] = React.useState(true);
+    const [bookings, setBookings] = React.useState([]);
+    const [loadingBookings, setLoadingBookings] = React.useState(true);
+
+    React.useEffect(() => {
+        const fetchBookings = async () => {
+            if (!user) return;
+            try {
+                // Removed orderBy to avoid needing a composite index immediately
+                const q = query(
+                    collection(db, 'bookings'),
+                    where('userId', '==', user.uid)
+                );
+                const querySnapshot = await getDocs(q);
+                const bookedSessions = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Sort client-side
+                bookedSessions.sort((a, b) => {
+                    const timeA = a.startTime.seconds || 0;
+                    const timeB = b.startTime.seconds || 0;
+                    return timeA - timeB;
+                });
+
+                console.log("Fetched bookings:", bookedSessions);
+                setBookings(bookedSessions);
+            } catch (error) {
+                console.error("Error fetching bookings:", error);
+            } finally {
+                setLoadingBookings(false);
+            }
+        };
+
+        fetchBookings();
+    }, [user]);
+
     return (
         <div className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-gradient-to-b from-green-50/50 to-white">
+            {showAffirmation && <DailyAffirmation onClose={() => setShowAffirmation(false)} />}
             <InteractiveBranch />
 
             {/* Nature-inspired Background Elements */}
@@ -142,6 +248,68 @@ export default function Dashboard() {
                         A space to grow, reflect, and find your balance.
                     </p>
                 </motion.div>
+
+                {/* Bookings Section */}
+                {user && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="mb-12"
+                    >
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                            <span className="text-2xl">📅</span> Your Upcoming Sessions
+                        </h2>
+
+                        {loadingBookings ? (
+                            <div className="text-gray-500 italic">Loading sessions...</div>
+                        ) : bookings.length > 0 ? (
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {bookings.map((booking) => {
+                                    const startTime = booking.startTime.seconds ? new Date(booking.startTime.seconds * 1000) : new Date(booking.startTime);
+                                    const endTime = booking.endTime.seconds ? new Date(booking.endTime.seconds * 1000) : new Date(booking.endTime);
+
+                                    return (
+                                        <div key={booking.id} className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-100 shadow-sm hover:shadow-md transition-all">
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div>
+                                                    <h3 className="font-bold text-gray-900">{booking.mentorName}</h3>
+                                                    <span className="text-xs font-medium px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">
+                                                        Confirmed
+                                                    </span>
+                                                </div>
+                                                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-xl">
+                                                    👤
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2 text-sm text-gray-600">
+                                                <div className="flex items-center gap-2">
+                                                    <span>🗓️</span>
+                                                    <span>{startTime.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span>⏰</span>
+                                                    <span>
+                                                        {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -
+                                                        {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 text-center border border-gray-100">
+                                <p className="text-gray-500 mb-4">You haven't booked any sessions yet.</p>
+                                <Link to="/mentors" className="text-emerald-600 font-medium hover:underline">
+                                    Browse Mentors &rarr;
+                                </Link>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
 
                 <motion.div
                     variants={container}

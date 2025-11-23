@@ -1,39 +1,32 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase'; // Your Firebase config file
-import { useAuth } from '../auth'; // Your auth context hook
+import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useAuth } from '../auth';
 
 const MentorBooking = () => {
-    const { mentorId } = useParams(); // Get mentor ID from the URL (e.g., /mentors/anish)
-    const { user } = useAuth(); // Get the currently logged-in user
+    const { mentorId } = useParams();
+    const { user } = useAuth();
 
-    // State for the mentor's profile data
     const [mentorData, setMentorData] = useState(null);
-    // State for the mentor's available time slots
     const [availabilityData, setAvailabilityData] = useState(null);
-    // State for the page's initial loading status
     const [loading, setLoading] = useState(true);
-    // State for any errors during data fetching
     const [error, setError] = useState(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-    // State to manage the status of the booking API call
     const [bookingStatus, setBookingStatus] = useState({
         loading: false,
         error: null,
         success: false,
     });
 
-    // A function to fetch all necessary data from Firestore
     const fetchData = useCallback(async () => {
         if (!mentorId) return;
         setLoading(true);
         try {
-            // Fetch mentor's profile
             const mentorRef = doc(db, 'mentors', mentorId);
             const mentorSnap = await getDoc(mentorRef);
 
-            // Fetch mentor's availability
             const availabilityRef = doc(db, 'mentorAvailability', mentorId);
             const availabilitySnap = await getDoc(availabilityRef);
 
@@ -51,59 +44,55 @@ const MentorBooking = () => {
         }
     }, [mentorId]);
 
-    // Run the data fetching function when the component mounts
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
-    // This is the main function called when a user clicks "Book Now"
-    const handleBookNow = async (slot) => {
+    const handleBookNow = async (slotToBook) => {
         if (!user) {
-            alert('Please log in or sign up to book a session.');
+            alert("Please log in to book a session.");
             return;
         }
-
-        // Set the state to show a loading indicator
         setBookingStatus({ loading: true, error: null, success: false });
 
         try {
-            // Call our Vercel serverless function
-            const response = await fetch('/api/bookSession', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    mentorId: mentorId,
-                    slot: slot,
-                    userId: user.uid,
-                    userEmail: user.email, // Passing the user's email for the confirmation
-                }),
+            const availabilityRef = doc(db, 'mentorAvailability', mentorId);
+
+            // Create a new array with the updated slot
+            const updatedSlots = availabilityData.slots.map(slot => {
+                // Compare timestamps to identify the correct slot
+                if (slot.startTime.seconds === slotToBook.startTime.seconds &&
+                    slot.endTime.seconds === slotToBook.endTime.seconds) {
+                    return { ...slot, isBooked: true, bookedBy: user.uid };
+                }
+                return slot;
             });
 
-            const data = await response.json();
+            await updateDoc(availabilityRef, {
+                slots: updatedSlots
+            });
 
-            if (!response.ok) {
-                // If the server returns an error, throw it to the catch block
-                throw new Error(data.message || 'An unknown error occurred.');
-            }
+            // Save to bookings collection for easy retrieval on Dashboard
+            await addDoc(collection(db, 'bookings'), {
+                userId: user.uid,
+                mentorId: mentorId,
+                mentorName: mentorData.name,
+                startTime: slotToBook.startTime,
+                endTime: slotToBook.endTime,
+                status: 'confirmed',
+                createdAt: serverTimestamp()
+            });
 
-            // On success, update the state and show a confirmation
             setBookingStatus({ loading: false, error: null, success: true });
-            alert(`Booking successful! A confirmation email has been sent to ${user.email}.`);
+            setShowSuccessModal(true);
 
-            // Refresh the availability data to show the slot as booked
+            // Refresh data
             fetchData();
-
         } catch (err) {
-            // On failure, update the state and show the error
-            console.error('Frontend booking error:', err);
-            setBookingStatus({ loading: false, error: err.message, success: false });
-            alert(`Booking Failed: ${err.message}`);
+            console.error("Error booking session:", err);
+            setBookingStatus({ loading: false, error: "Failed to book session. Please try again.", success: false });
         }
     };
-
-    // --- Render Logic ---
 
     if (loading) {
         return (
@@ -133,7 +122,6 @@ const MentorBooking = () => {
         <div className="relative min-h-screen bg-gradient-to-b from-green-50/50 to-white overflow-hidden">
             {/* Nature-inspired Background Elements */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                {/* Abstract Tree/Leaf Shapes */}
                 <svg className="absolute top-10 right-20 w-32 h-32 text-green-200 opacity-30" viewBox="0 0 100 100">
                     <path d="M50 10 Q60 30 50 50 Q40 30 50 10" fill="currentColor" />
                     <path d="M50 50 Q70 60 60 80 Q50 70 50 50" fill="currentColor" />
@@ -144,7 +132,6 @@ const MentorBooking = () => {
                     <circle cx="30" cy="30" r="20" fill="currentColor" opacity="0.5" />
                 </svg>
 
-                {/* Floating Orbs */}
                 <div className="absolute top-20 left-10 w-64 h-64 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
                 <div className="absolute top-20 right-10 w-64 h-64 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
                 <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
@@ -189,21 +176,28 @@ const MentorBooking = () => {
                                                 🕐 {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </p>
                                         </div>
-                                        <button
-                                            className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 min-w-[120px] ${slot.isBooked || bookingStatus.loading
-                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-200'
-                                                }`}
-                                            onClick={() => handleBookNow(slot)}
-                                            disabled={slot.isBooked || bookingStatus.loading}
-                                        >
-                                            {bookingStatus.loading ? (
-                                                <div className="flex items-center space-x-2">
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                                    <span>Booking...</span>
-                                                </div>
-                                            ) : (slot.isBooked ? 'Booked ✓' : 'Book Now')}
-                                        </button>
+                                        <div className="flex flex-col items-end gap-2">
+                                            <button
+                                                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 min-w-[120px] ${slot.isBooked || bookingStatus.loading
+                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-200'
+                                                    }`}
+                                                onClick={() => handleBookNow(slot)}
+                                                disabled={slot.isBooked || bookingStatus.loading}
+                                            >
+                                                {bookingStatus.loading ? (
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                        <span>Booking...</span>
+                                                    </div>
+                                                ) : (slot.isBooked ? 'Booked ✓' : 'Book Now')}
+                                            </button>
+                                            {bookingStatus.error && !bookingStatus.success && (
+                                                <p className="text-destructive text-sm font-medium animate-in fade-in slide-in-from-top-1">
+                                                    {bookingStatus.error}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -217,6 +211,37 @@ const MentorBooking = () => {
                     )}
                 </div>
             </div>
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-emerald-100 text-center relative overflow-hidden animate-in fade-in zoom-in duration-300">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
+
+                        <div className="mb-6 bg-emerald-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
+                            <span className="text-4xl">✅</span>
+                        </div>
+
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h3>
+                        <p className="text-gray-600 mb-6">
+                            You've taken a great step for yourself. A confirmation email has been sent to {user.email}.
+                        </p>
+
+                        <div className="bg-emerald-50 rounded-xl p-4 mb-8 border border-emerald-100">
+                            <p className="text-emerald-800 italic font-medium">
+                                "Invest in yourself, you are worth it."
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() => setShowSuccessModal(false)}
+                            className="w-full bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
+                        >
+                            Wonderful, thanks!
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

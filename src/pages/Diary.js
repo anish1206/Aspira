@@ -14,7 +14,6 @@ import {
     serverTimestamp,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-// Header removed as per user request
 
 const Diary = () => {
     const [entry, setEntry] = useState("");
@@ -95,43 +94,70 @@ const Diary = () => {
 
     // Canvas initialization
     useEffect(() => {
-        if (activeTab === "journal" && canvasRef.current) {
+        if (activeTab === "journal" && canvasRef.current && !isGratitudeMode) {
             const canvas = canvasRef.current;
             const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = 300;
+            // Only set width/height if they haven't been set to avoid clearing on re-render
+            if (canvas.width !== rect.width) {
+                canvas.width = rect.width;
+                canvas.height = 300;
+            }
 
             const context = canvas.getContext("2d");
             context.lineCap = "round";
             context.lineJoin = "round";
             setCtx(context);
         }
-    }, [activeTab]);
+    }, [activeTab, isGratitudeMode]);
+
+    // Drawing Functions
+    const getCoordinates = (e) => {
+        if (!canvasRef.current) return { x: 0, y: 0 };
+        const rect = canvasRef.current.getBoundingClientRect();
+        let clientX, clientY;
+
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    };
 
     const startDrawing = (e) => {
         if (!ctx) return;
-        const rect = canvasRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        if (drawingMode === "text") {
+            const { x, y } = getCoordinates(e);
+            setTextPosition({ x, y });
+            setShowTextInput(true);
+            return;
+        }
 
+        e.preventDefault(); // Prevent scrolling on touch
+        const { x, y } = getCoordinates(e);
         ctx.beginPath();
         ctx.moveTo(x, y);
         setIsDrawing(true);
     };
 
     const draw = (e) => {
-        if (!isDrawing || !ctx) return;
-        const rect = canvasRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        ctx.lineWidth = brushSize;
-        ctx.strokeStyle = drawingMode === "erase" ? "#ffffff" : brushColor;
+        if (!isDrawing || !ctx || drawingMode === "text") return;
+        e.preventDefault();
+        const { x, y } = getCoordinates(e);
 
         if (drawingMode === "erase") {
             ctx.globalCompositeOperation = "destination-out";
+            ctx.lineWidth = brushSize * 2;
         } else {
             ctx.globalCompositeOperation = "source-over";
+            ctx.strokeStyle = brushColor;
+            ctx.lineWidth = brushSize;
         }
 
         ctx.lineTo(x, y);
@@ -139,69 +165,90 @@ const Diary = () => {
     };
 
     const stopDrawing = () => {
-        if (!ctx) return;
-        ctx.closePath();
-        setIsDrawing(false);
-        ctx.globalCompositeOperation = "source-over";
+        if (isDrawing && ctx) {
+            ctx.closePath();
+            setIsDrawing(false);
+        }
+    };
+
+    const clearCanvas = () => {
+        if (ctx && canvasRef.current) {
+            ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        }
     };
 
     const addTextToCanvas = () => {
         if (!ctx || !textInput) return;
-        ctx.font = `${brushSize * 4}px Arial`;
+        ctx.globalCompositeOperation = "source-over";
+        ctx.font = `${brushSize * 3}px sans-serif`;
         ctx.fillStyle = brushColor;
         ctx.fillText(textInput, textPosition.x, textPosition.y);
         setTextInput("");
         setShowTextInput(false);
-        setDrawingMode("draw");
     };
 
-    const clearCanvas = () => {
-        if (!ctx || !canvasRef.current) return;
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    const isCanvasBlank = (canvas) => {
+        const context = canvas.getContext('2d');
+        const pixelBuffer = new Uint32Array(
+            context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+        );
+        return !pixelBuffer.some(color => color !== 0);
     };
 
     const saveEntry = async () => {
-        if ((!entry.trim() && !isGratitudeMode && !canvasRef.current) || !user) return;
+        if (!user) return;
+
+        const hasText = entry.trim().length > 0;
+        const hasDrawing = canvasRef.current && !isCanvasBlank(canvasRef.current);
+
+        // Gratitude Mode
+        if (isGratitudeMode) {
+            if (!gratitudePrompts.highlight && !gratitudePrompts.person && !gratitudePrompts.lesson) {
+                alert("Please fill in at least one gratitude prompt.");
+                return;
+            }
+            try {
+                await addDoc(collection(db, "diary"), {
+                    userId: user.uid,
+                    content: JSON.stringify(gratitudePrompts),
+                    type: "gratitude",
+                    createdAt: serverTimestamp(),
+                });
+                setGratitudePrompts({ highlight: "", person: "", lesson: "" });
+                setIsGratitudeMode(false);
+                alert("Gratitude entry saved!");
+            } catch (error) {
+                console.error("Error saving gratitude:", error);
+                alert("Failed to save entry.");
+            }
+            return;
+        }
+
+        // Standard Mode
+        if (!hasText && !hasDrawing) {
+            alert("Please write something or draw before saving!");
+            return;
+        }
+
+        let drawingDataUrl = null;
+        if (hasDrawing) {
+            drawingDataUrl = canvasRef.current.toDataURL();
+        }
 
         try {
-            let entryData = {
+            await addDoc(collection(db, "diary"), {
                 userId: user.uid,
+                content: entry,
+                drawing: drawingDataUrl,
+                type: "journal",
                 createdAt: serverTimestamp(),
-                type: isGratitudeMode ? "gratitude" : "journal",
-            };
-
-            if (isGratitudeMode) {
-                entryData.content = JSON.stringify(gratitudePrompts);
-            } else {
-                entryData.content = entry;
-                // Save drawing if exists and has content
-                if (canvasRef.current) {
-                    // Simple check if canvas is not empty could be added here
-                    entryData.drawing = canvasRef.current.toDataURL();
-                }
-            }
-
-            await addDoc(collection(db, "diary"), entryData);
+            });
             setEntry("");
-            setGratitudePrompts({ highlight: "", person: "", lesson: "" });
-            setIsGratitudeMode(false);
             clearCanvas();
-            alert("Entry saved successfully!");
+            alert("Journal entry saved!");
         } catch (error) {
             console.error("Error saving entry:", error);
-            alert("Error saving entry. Please try again.");
-        }
-    };
-
-    const toggleIntention = async (id) => {
-        const intention = intentions.find(i => i.id === id);
-        if (!intention) return;
-        try {
-            await updateDoc(doc(db, "intentions", id), {
-                completed: !intention.completed
-            });
-        } catch (error) {
-            console.error("Error toggling intention:", error);
+            alert("Failed to save entry.");
         }
     };
 
@@ -217,6 +264,18 @@ const Diary = () => {
             });
         } catch (error) {
             console.error("Error adding intention:", error);
+        }
+    };
+
+    const toggleIntention = async (id) => {
+        const intention = intentions.find(i => i.id === id);
+        if (!intention) return;
+        try {
+            await updateDoc(doc(db, "intentions", id), {
+                completed: !intention.completed
+            });
+        } catch (error) {
+            console.error("Error toggling intention:", error);
         }
     };
 
@@ -274,7 +333,6 @@ const Diary = () => {
 
     return (
         <div className="min-h-screen bg-background pb-20">
-
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
                 {/* Header Section */}
                 <div className="bg-gradient-to-br from-gray-900 to-green-900 rounded-3xl p-8 mb-8 text-white shadow-xl relative overflow-hidden">
@@ -284,8 +342,6 @@ const Diary = () => {
                             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </p>
                     </div>
-
-                    {/* Decorative circles */}
                     <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
                     <div className="absolute bottom-0 right-0 w-64 h-64 bg-white/10 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl"></div>
                 </div>
@@ -425,35 +481,33 @@ const Diary = () => {
                                                 onClick={clearCanvas}
                                                 className="px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                                             >
-                                                Clear Canvas
+                                                Clear
                                             </button>
                                         </div>
 
-                                        <div className="relative bg-white rounded-lg border border-border overflow-hidden">
-                                            <canvas
-                                                ref={canvasRef}
-                                                onMouseDown={startDrawing}
-                                                onMouseMove={draw}
-                                                onMouseUp={stopDrawing}
-                                                onMouseLeave={stopDrawing}
-                                                className="w-full h-[300px] cursor-crosshair touch-none"
-                                            />
-                                            <p className="text-xs text-muted-foreground mt-2 text-center">
-                                                {drawingMode === "text" ? "Click on canvas to add text" : "Draw freely on the canvas"}
-                                            </p>
-                                        </div>
-                                    </div>
+                                        <canvas
+                                            ref={canvasRef}
+                                            onMouseDown={startDrawing}
+                                            onMouseMove={draw}
+                                            onMouseUp={stopDrawing}
+                                            onMouseLeave={stopDrawing}
+                                            onTouchStart={startDrawing}
+                                            onTouchMove={draw}
+                                            onTouchEnd={stopDrawing}
+                                            className="w-full bg-white rounded-xl shadow-sm border border-border cursor-crosshair touch-none"
+                                        />
 
-                                    <div className="mt-6 flex justify-end">
-                                        <button
-                                            onClick={saveEntry}
-                                            className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-medium hover:opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
-                                        >
-                                            <span>Save Entry</span>
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        </button>
+                                        <div className="mt-6 flex justify-end">
+                                            <button
+                                                onClick={saveEntry}
+                                                className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-medium hover:opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
+                                            >
+                                                <span>Save Entry</span>
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
