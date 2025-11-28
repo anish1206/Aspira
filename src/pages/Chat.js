@@ -22,6 +22,9 @@ const Chat = () => {
     const [newMessage, setNewMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [started, setStarted] = useState(false);
+    const [selectedMood, setSelectedMood] = useState("Friendly");
+    const [editingSessionId, setEditingSessionId] = useState(null);
+    const [editingTitle, setEditingTitle] = useState("");
 
     const chatContainerRef = useRef(null);
     const inputRef = useRef(null);
@@ -56,7 +59,7 @@ const Chat = () => {
             return;
         }
 
-        setStarted(true); // If we have a session ID, we are "started" even if empty messages initially
+        setStarted(true);
 
         const q = query(
             collection(db, "chats", user.uid, "sessions", currentSessionId, "messages"),
@@ -93,7 +96,15 @@ const Chat = () => {
         if (!user) return null;
 
         try {
-            const title = firstMessageText.slice(0, 30) + (firstMessageText.length > 30 ? "..." : "");
+            // Generate timestamp-based title
+            const now = new Date();
+            const title = now.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
             const docRef = await addDoc(collection(db, "chats", user.uid, "sessions"), {
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
@@ -103,6 +114,21 @@ const Chat = () => {
         } catch (error) {
             console.error("Error creating session:", error);
             return null;
+        }
+    };
+
+    const renameSession = async (sessionId, newTitle) => {
+        if (!newTitle.trim()) return;
+        try {
+            const user = auth.currentUser;
+            if (!user) return;
+            await updateDoc(doc(db, "chats", user.uid, "sessions", sessionId), {
+                title: newTitle.trim()
+            });
+            setEditingSessionId(null);
+            setEditingTitle("");
+        } catch (error) {
+            console.error("Error renaming session:", error);
         }
     };
 
@@ -172,7 +198,7 @@ const Chat = () => {
             const response = await fetch('/api/askGemini', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ history: historyForAPI, message: userText }),
+                body: JSON.stringify({ history: historyForAPI, message: userText, userId: user.uid, mood: selectedMood }),
             });
 
             const raw = await response.text();
@@ -214,9 +240,11 @@ const Chat = () => {
         if (inputRef.current) inputRef.current.focus();
     };
 
+    const moods = ["Friendly", "Professional", "Empathetic", "Witty", "Motivational", "Reasoning"];
+
     const SidebarContent = () => (
         <div className="flex flex-col h-full p-4">
-            <div className="mb-6">
+            <div className="mb-6 space-y-3">
                 <button
                     onClick={handleNewChat}
                     className="w-full flex items-center gap-2 px-4 py-3 bg-green-900 text-white rounded-xl hover:opacity-90 transition-all shadow-sm font-medium"
@@ -224,6 +252,20 @@ const Chat = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                     New Chat
                 </button>
+
+                {/* Mood Selector */}
+                <div>
+                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-2">AI Mood</label>
+                    <select
+                        value={selectedMood}
+                        onChange={(e) => setSelectedMood(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    >
+                        {moods.map(mood => (
+                            <option key={mood} value={mood}>{mood}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto">
@@ -237,23 +279,59 @@ const Chat = () => {
                         sessions.map(session => (
                             <div
                                 key={session.id}
-                                onClick={() => setCurrentSessionId(session.id)}
+                                onClick={() => {
+                                    if (editingSessionId !== session.id) {
+                                        setCurrentSessionId(session.id);
+                                    }
+                                }}
                                 className={`group flex items-center justify-between px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors ${currentSessionId === session.id
                                     ? "bg-muted font-medium text-foreground"
                                     : "text-muted-foreground hover:bg-muted/50"
                                     }`}
                             >
-                                <span className="truncate flex-1">{session.title || "Untitled Chat"}</span>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteSession(session.id);
-                                    }}
-                                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-background rounded-md text-muted-foreground hover:text-destructive transition-all"
-                                    title="Delete chat"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
-                                </button>
+                                {editingSessionId === session.id ? (
+                                    <input
+                                        type="text"
+                                        value={editingTitle}
+                                        onChange={(e) => setEditingTitle(e.target.value)}
+                                        onBlur={() => renameSession(session.id, editingTitle)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') renameSession(session.id, editingTitle);
+                                            if (e.key === 'Escape') {
+                                                setEditingSessionId(null);
+                                                setEditingTitle("");
+                                            }
+                                        }}
+                                        className="flex-1 bg-background border border-primary rounded px-2 py-1 text-sm outline-none"
+                                        autoFocus
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                ) : (
+                                    <span className="truncate flex-1">{session.title || "Untitled Chat"}</span>
+                                )}
+                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingSessionId(session.id);
+                                            setEditingTitle(session.title || "");
+                                        }}
+                                        className="p-1 hover:bg-background rounded-md text-muted-foreground hover:text-foreground transition-all"
+                                        title="Rename chat"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /></svg>
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteSession(session.id);
+                                        }}
+                                        className="p-1 hover:bg-background rounded-md text-muted-foreground hover:text-destructive transition-all"
+                                        title="Delete chat"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>
+                                    </button>
+                                </div>
                             </div>
                         ))
                     )}
