@@ -9,7 +9,7 @@ import {
     signOut,
 } from "firebase/auth";
 import { auth } from "./firebase";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -85,6 +85,20 @@ const Login = () => {
                 <div className="flex items-center space-x-2">
                     <span className="text-3xl jersey-15-regular font-bold text-foreground">Aspira</span>
                 </div>
+            </div>
+
+            {/* Back to Dashboard */}
+            <div className="absolute top-6 right-6 z-10">
+                <Link
+                    to="/"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-foreground hover:bg-white/20 transition-all text-sm font-medium"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 12H5" />
+                        <path d="M12 19l-7-7 7-7" />
+                    </svg>
+                    <span>Back to Dashboard</span>
+                </Link>
             </div>
 
             {/* Login Card */}
