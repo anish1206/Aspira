@@ -15,7 +15,7 @@ import {
     setDoc
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import "./Diary.css"; // Ensure CSS is imported
+import InteractiveBranch from "../components/InteractiveBranch";
 
 const Diary = () => {
     const [user, setUser] = useState(null);
@@ -163,34 +163,45 @@ const Diary = () => {
 
     if (!user) {
         return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                <p className="mt-4 text-muted-foreground">Please log in to access your diary.</p>
+            <div className="min-h-screen bg-gray-50/50 flex flex-col items-center justify-center relative overflow-hidden">
+                <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+                    <InteractiveBranch />
+                </div>
+                <div className="relative z-10">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-900 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Please log in to access your diary.</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-background pb-20 diary-container">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+        <div className="min-h-screen bg-gray-50/50 pb-20 relative overflow-hidden">
+            {/* Background Animation */}
+            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+                <InteractiveBranch />
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
 
                 {/* Tab Navigation */}
                 <div className="flex justify-center mb-8 gap-4">
                     <button
                         onClick={() => setActiveTab("write")}
                         className={`px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 ${activeTab === "write"
-                                ? "bg-primary text-primary-foreground shadow-lg scale-105"
-                                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                ? "bg-green-900 text-white shadow-lg scale-105"
+                                : "bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white border border-gray-200"
                             }`}
                     >
                         ✍️ Relax & Write
                     </button>
                     <button
                         onClick={() => setActiveTab("read")}
-                        className={`px - 8 py - 3 rounded - full text - lg font - medium transition - all duration - 300 ${activeTab === "read"
-                                ? "bg-primary text-primary-foreground shadow-lg scale-105"
-                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                            } `}
+                        className={`px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 ${activeTab === "read"
+                                ? "bg-green-900 text-white shadow-lg scale-105"
+                                : "bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white border border-gray-200"
+                            }`}
                     >
                         📖 Read Memories
                     </button>
@@ -198,31 +209,31 @@ const Diary = () => {
 
                 {/* WRITE MODE */}
                 {activeTab === "write" && (
-                    <div className="max-w-3xl mx-auto animate-fade-in">
-                        <div className="bg-card rounded-3xl shadow-xl border border-border p-8 min-h-[600px] flex flex-col relative overflow-hidden">
+                    <div className="max-w-3xl mx-auto">
+                        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 p-8 min-h-[600px] flex flex-col relative overflow-hidden">
                             {/* Relaxing Background Element */}
-                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400"></div>
+                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500"></div>
 
                             <div className="flex items-center justify-between mb-8">
                                 <div>
-                                    <h2 className="text-3xl font-bold text-foreground">
+                                    <h2 className="text-3xl font-bold text-gray-800">
                                         {selectedDate.toLocaleDateString('en-US', { weekday: 'long' })}
                                     </h2>
-                                    <p className="text-muted-foreground">
+                                    <p className="text-gray-600">
                                         {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                     </p>
                                 </div>
 
                                 {/* AI Access Toggle (Compact) */}
-                                <div className="flex items-center gap-3 bg-muted/30 px-4 py-2 rounded-full border border-border">
-                                    <span className="text-xs font-medium text-muted-foreground">
+                                <div className="flex items-center gap-3 bg-gray-100/60 px-4 py-2 rounded-full border border-gray-200">
+                                    <span className="text-xs font-medium text-gray-600">
                                         {aiAccessEnabled ? "AI Access ON" : "Private Mode"}
                                     </span>
                                     <button
                                         onClick={toggleAiAccess}
-                                        className={`w - 10 h - 5 rounded - full p - 0.5 transition - colors duration - 300 ${aiAccessEnabled ? 'bg-green-500' : 'bg-gray-300'} `}
+                                        className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 ${aiAccessEnabled ? 'bg-green-500' : 'bg-gray-300'}`}
                                     >
-                                        <div className={`w - 4 h - 4 bg - white rounded - full shadow - sm transform transition - transform duration - 300 ${aiAccessEnabled ? 'translate-x-5' : 'translate-x-0'} `}></div>
+                                        <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-300 ${aiAccessEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
                                     </button>
                                 </div>
                             </div>
@@ -233,12 +244,12 @@ const Diary = () => {
                                     value={entry}
                                     onChange={(e) => setEntry(e.target.value)}
                                     placeholder="Take a deep breath... What's on your mind today?"
-                                    className="flex-1 w-full p-6 rounded-2xl border-none bg-muted/20 focus:bg-muted/30 focus:ring-0 outline-none transition-all resize-none text-lg leading-relaxed placeholder:text-muted-foreground/50"
+                                    className="flex-1 w-full p-6 rounded-2xl border-none bg-gray-50/50 focus:bg-gray-50 focus:ring-0 outline-none transition-all resize-none text-lg leading-relaxed placeholder:text-gray-400"
                                     style={{ minHeight: '300px' }}
                                 />
 
                                 <div className="mt-6 flex justify-between items-center">
-                                    <p className="text-xs text-muted-foreground italic">
+                                    <p className="text-xs text-gray-500 italic">
                                         {aiAccessEnabled
                                             ? "ℹ️ AI can read this to help you."
                                             : "🔒 Encrypted & Private. AI cannot see this."}
@@ -246,7 +257,7 @@ const Diary = () => {
                                     <button
                                         onClick={saveEntry}
                                         disabled={!entry.trim()}
-                                        className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-medium hover:opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1"
+                                        className="bg-green-900 text-white px-8 py-3 rounded-xl font-medium hover:bg-green-800 transition-all shadow-lg shadow-green-900/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1"
                                     >
                                         <span>Save to Diary</span>
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -261,9 +272,9 @@ const Diary = () => {
 
                 {/* READ MODE (BOOK ANIMATION) */}
                 {activeTab === "read" && (
-                    <div className="flex flex-col items-center justify-center min-h-[600px] animate-fade-in">
+                    <div className="flex flex-col items-center justify-center min-h-[600px]">
                         {entries.length === 0 ? (
-                            <div className="text-center text-muted-foreground">
+                            <div className="text-center text-gray-600 bg-white/80 backdrop-blur-xl rounded-2xl p-12 border border-gray-200">
                                 <p className="text-xl">Your diary is empty.</p>
                                 <p className="text-sm mt-2">Switch to the Write tab to start your journey.</p>
                             </div>
