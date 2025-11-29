@@ -28,8 +28,8 @@ const Nav = () => {
         { to: '/dashboard', label: 'Dashboard' },
         { to: '/chat', label: 'Chat' },
         { to: '/groups', label: 'Groups' },
-        { to: '/mindscape', label: 'Creative Therapy' },
-        { to: '/mentors', label: 'Mentors' },
+        // { to: '/mindscape', label: 'Creative Therapy' },
+        // { to: '/mentors', label: 'Mentors' },
         { to: '/diary', label: 'Diary' },
         { to: '/settings', label: 'Settings' },
     ];
