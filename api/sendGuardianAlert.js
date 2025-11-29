@@ -44,7 +44,7 @@ export default async function handler(request, response) {
     }
 
     try {
-        // Fetch guardian details from user's Firestore document
+        // Fetch user details from Firestore
         const userDoc = await db.collection('users').doc(userId).get();
 
         if (!userDoc.exists) {
@@ -52,13 +52,10 @@ export default async function handler(request, response) {
         }
 
         const userData = userDoc.data();
+        const accountType = userData.accountType || 'individual';
+        const emergencyPreference = userData.emergencyPreference || 'guardian';
         const guardianPhone = userData.guardianPhone;
         const guardianName = userData.guardianName || 'Guardian';
-
-        if (!guardianPhone) {
-            console.log(`No guardian phone found for user ${userId}`);
-            return response.status(404).json({ message: 'No guardian contact configured' });
-        }
 
         // Initialize Twilio client
         const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -71,39 +68,89 @@ export default async function handler(request, response) {
         }
 
         const client = twilio(twilioAccountSid, twilioAuthToken);
-
-        // Get timestamp for alert
         const timestamp = new Date().toLocaleString('en-IN', {
             timeZone: 'Asia/Kolkata',
             dateStyle: 'medium',
             timeStyle: 'short'
         });
 
-        // Construct alert message (without exposing full message content)
-        const alertMessage = `⚠️ URGENT ALERT from MindSync\n\nDear ${guardianName},\n\nYour ward may need immediate support. They expressed concerning thoughts during a conversation on ${timestamp}.\n\nPlease reach out to them as soon as possible.\n\nIf this is an emergency, please contact local crisis helplines:\n🇮🇳 India: 9152987821 (iCall)\n\n- MindSync Care Team`;
+        const sentMessages = [];
 
-        // Send SMS via Twilio
-        const message = await client.messages.create({
-            body: alertMessage,
-            from: twilioPhoneNumber,
-            to: guardianPhone
-        });
+        // Handle based on emergency preference
+        if (emergencyPreference === 'emergency_services' && userData.emergencyServicesConsent) {
+            // Contact emergency services (112 for India, 911 for US)
+            // Note: This is a placeholder - actual emergency services contact requires special setup
+            console.log(`🚨 Emergency services contact needed for user ${userId}`);
+            
+            const emergencyMessage = `🚨 EMERGENCY ALERT from Aspira Mental Health\n\nEmergency services needed for a user experiencing mental health crisis.\n\nTimestamp: ${timestamp}\n\nUser ID: ${userId}\n\nPlease respond immediately.`;
 
-        console.log(`Guardian alert sent successfully. SID: ${message.sid}`);
+            // Log emergency services alert (would need actual emergency services integration)
+            await db.collection('emergency_alerts').add({
+                userId: userId,
+                timestamp: new Date(),
+                type: 'emergency_services',
+                status: 'logged'
+            });
 
-        // Log the alert (without sensitive message content)
-        await db.collection('guardian_alerts').add({
-            userId: userId,
-            guardianPhone: guardianPhone,
-            timestamp: new Date(),
-            messageSid: message.sid,
-            status: 'sent'
-        });
+            sentMessages.push({ type: 'emergency_services', status: 'logged' });
+        }
+
+        // Send to guardian if available (for guardian preference or as backup)
+        if (guardianPhone && (emergencyPreference === 'guardian' || accountType === 'minor')) {
+            const guardianMessage = `⚠️ URGENT ALERT from Aspira\n\nDear ${guardianName},\n\nYour ward may need immediate support. They expressed concerning thoughts during a conversation on ${timestamp}.\n\nPlease reach out to them as soon as possible.\n\nIf this is an emergency, please contact local crisis helplines:\n🇮🇳 India: 9152987821 (iCall)\n🇺🇸 US: 988 (Suicide & Crisis Lifeline)\n\n- Aspira Care Team`;
+
+            try {
+                const message = await client.messages.create({
+                    body: guardianMessage,
+                    from: twilioPhoneNumber,
+                    to: guardianPhone
+                });
+
+                console.log(`Guardian alert sent. SID: ${message.sid}`);
+                sentMessages.push({ type: 'guardian', phone: guardianPhone, sid: message.sid });
+
+                await db.collection('guardian_alerts').add({
+                    userId: userId,
+                    recipientType: 'guardian',
+                    guardianPhone: guardianPhone,
+                    timestamp: new Date(),
+                    messageSid: message.sid,
+                    status: 'sent'
+                });
+            } catch (smsError) {
+                console.error('Error sending guardian SMS:', smsError);
+                sentMessages.push({ type: 'guardian', status: 'failed', error: smsError.message });
+            }
+        }
+
+        // Send to company HR if applicable
+        if (accountType === 'company' && userData.companyHrConsent && userData.companyName) {
+            // In production, you'd fetch company HR contact from a companies collection
+            // For now, we'll log it
+            console.log(`Company HR alert needed for ${userData.companyName}`);
+
+            const companyAlert = {
+                userId: userId,
+                companyName: userData.companyName,
+                timestamp: new Date(),
+                type: 'company_hr',
+                status: 'logged',
+                message: 'Employee needs mental health support'
+            };
+
+            await db.collection('company_alerts').add(companyAlert);
+            sentMessages.push({ type: 'company_hr', company: userData.companyName, status: 'logged' });
+        }
+
+        if (sentMessages.length === 0) {
+            console.log(`No alert recipients configured for user ${userId}`);
+            return response.status(404).json({ message: 'No emergency contacts configured' });
+        }
 
         return response.status(200).json({
             success: true,
-            message: 'Guardian alert sent successfully',
-            messageSid: message.sid
+            message: 'Emergency alerts sent',
+            alerts: sentMessages
         });
 
     } catch (error) {
