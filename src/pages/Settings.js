@@ -1,7 +1,9 @@
 // src/pages/Settings.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../auth";
 import InteractiveBranch from "../components/InteractiveBranch";
+import { db } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function Settings() {
     const { user } = useAuth();
@@ -10,7 +12,143 @@ export default function Settings() {
     const [notifications, setNotifications] = useState(true);
     const [darkMode, setDarkMode] = useState(false);
 
+    // Guardian contact states
+    const [guardianName, setGuardianName] = useState("");
+    const [guardianPhone, setGuardianPhone] = useState("");
+    const [guardianSaving, setGuardianSaving] = useState(false);
+    const [guardianMessage, setGuardianMessage] = useState("");
+
+    // Load guardian details on component mount
+    useEffect(() => {
+        const loadGuardianDetails = async () => {
+            if (!user) return;
+
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    setGuardianName(data.guardianName || "");
+                    setGuardianPhone(data.guardianPhone || "");
+                }
+            } catch (error) {
+                console.error("Error loading guardian details:", error);
+            }
+        };
+
+        loadGuardianDetails();
+    }, [user]);
+
+    // Phone number validation
+    const validatePhone = (phone) => {
+        // Check if phone has country code format (+XX...)
+        const phoneRegex = /^\+[1-9]\d{1,14}$/;
+        return phoneRegex.test(phone);
+    };
+
+    // Save guardian details
+    const saveGuardianDetails = async () => {
+        if (!user) {
+            setGuardianMessage("❌ You must be logged in");
+            setTimeout(() => setGuardianMessage(""), 3000);
+            return;
+        }
+
+        if (!guardianName.trim()) {
+            setGuardianMessage("❌ Please enter guardian name");
+            setTimeout(() => setGuardianMessage(""), 3000);
+            return;
+        }
+
+        if (!guardianPhone.trim()) {
+            setGuardianMessage("❌ Please enter guardian phone number");
+            setTimeout(() => setGuardianMessage(""), 3000);
+            return;
+        }
+
+        if (!validatePhone(guardianPhone)) {
+            setGuardianMessage("❌ Please use international format (e.g., +919876543210)");
+            setTimeout(() => setGuardianMessage(""), 3000);
+            return;
+        }
+
+        setGuardianSaving(true);
+        try {
+            await setDoc(doc(db, "users", user.uid), {
+                guardianName: guardianName.trim(),
+                guardianPhone: guardianPhone.trim()
+            }, { merge: true });
+            setGuardianMessage("✅ Guardian details saved successfully");
+            setTimeout(() => setGuardianMessage(""), 3000);
+        } catch (error) {
+            console.error("Error saving guardian details:", error);
+            setGuardianMessage("❌ Failed to save. Please try again.");
+            setTimeout(() => setGuardianMessage(""), 3000);
+        } finally {
+            setGuardianSaving(false);
+        }
+    };
+
+
     const settingsSections = [
+        {
+            title: "Guardian Contact",
+            icon: (
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M9 3.5C9 2.12 10.12 1 11.5 1S14 2.12 14 3.5 12.88 6 11.5 6 9 4.88 9 3.5ZM5.5 9.5c-.28 0-.5.22-.5.5s.22.5.5.5.5-.22.5-.5-.22-.5-.5-.5ZM18 10c0-.28-.22-.5-.5-.5s-.5.22-.5.5.22.5.5.5.5-.22.5-.5ZM5 18v-1.5c0-1.1.9-2 2-2h1.5l-1.34-2.34c-.16-.3-.16-.65 0-.95l1.42-2.42c.16-.27.46-.46.78-.46h5.3c.32 0 .6.19.77.46l1.42 2.42c.16.3.16.65 0 .95L15.5 14.5H17c1.1 0 2 .9 2 2V18h-4.68l-1.78 3.97L11.5 19 10.46 21.97 8.68 18H5Z" />
+                </svg>
+            ),
+            content: (
+                <div className="space-y-4">
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                        <p className="text-xs text-amber-800">
+                            <strong>🛡️ Safety Feature:</strong> Your guardian will be notified via SMS if our AI detects concerning thoughts in your conversations. This helps ensure you have support when you need it most.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-foreground">Guardian Name</label>
+                        <input
+                            type="text"
+                            value={guardianName}
+                            onChange={(e) => setGuardianName(e.target.value)}
+                            placeholder="Enter guardian's name"
+                            className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-foreground"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-foreground">Guardian Phone Number</label>
+                        <input
+                            type="tel"
+                            value={guardianPhone}
+                            onChange={(e) => setGuardianPhone(e.target.value)}
+                            placeholder="+919876543210"
+                            className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-foreground"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Include country code (e.g., +91 for India, +1 for US)
+                        </p>
+                    </div>
+
+                    {guardianMessage && (
+                        <div className={`text-sm p-2 rounded-lg ${guardianMessage.includes('✅')
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                            }`}>
+                            {guardianMessage}
+                        </div>
+                    )}
+
+                    <button
+                        onClick={saveGuardianDetails}
+                        disabled={guardianSaving}
+                        className="w-full px-4 py-2 text-sm font-medium text-white bg-green-900 rounded-lg hover:bg-green-800 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {guardianSaving ? "Saving..." : "Save Guardian Details"}
+                    </button>
+                </div>
+            )
+        },
         {
             title: "Account",
             icon: (

@@ -45,7 +45,7 @@ export default async function handler(request, response) {
         return response.status(405).json({ message: 'Method not allowed' });
     }
 
-    const { history, message, userId, mood } = request.body;
+    const { history = [], message = "", userId, mood } = request.body || {};
 
     try {
         // Fetch User Context if userId is provided
@@ -171,13 +171,50 @@ Keep replies structured and thoughtful. Guide them to their own insights through
             history: [
                 { role: "user", parts: [{ text: fullSystemPrompt }] },
                 { role: "model", parts: [{ text: "Hello! I'm Mindsync. I am here to listen." }] },
-                ...history,
+                ...(Array.isArray(history) ? history : []),
             ],
         });
 
         const result = await chat.sendMessage(message);
         const modelResponse = result.response;
         const text = modelResponse.text();
+
+        // === SUICIDE RISK DETECTION ===
+        const concerningKeywords = [
+            'suicide', 'kill myself', 'end my life', 'want to die',
+            'no point living', 'better off dead', 'end it all',
+            'take my life', 'harm myself', 'not worth living',
+            'everyone would be better', 'cant go on', "can't go on",
+            'give up on life', 'end the pain', 'self harm'
+        ];
+
+        const normalizedMessage = (message || '').toLowerCase();
+        const hasKeyword = concerningKeywords.some((keyword) =>
+            normalizedMessage.includes(keyword)
+        );
+
+        if (hasKeyword && userId) {
+            console.log(`🚨 Potential suicide risk detected for user: ${userId}`);
+
+            const baseUrlFromEnv = process.env.PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '');
+            const baseUrl = baseUrlFromEnv || origin || 'http://localhost:3000';
+
+            fetch(`${baseUrl}/api/sendGuardianAlert`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, messageContent: message })
+            })
+                .then((res) => {
+                    if (res.ok) {
+                        console.log('✅ Guardian alert sent');
+                    } else {
+                        console.warn('⚠️ Guardian alert failed', res.status);
+                    }
+                })
+                .catch((err) => {
+                    console.error('❌ Error sending guardian alert:', err);
+                });
+        }
 
         return response.status(200).json({ text });
 
@@ -186,3 +223,4 @@ Keep replies structured and thoughtful. Guide them to their own insights through
         return response.status(500).json({ message: "Failed to get a response from the AI.", error: error.message });
     }
 }
+```
