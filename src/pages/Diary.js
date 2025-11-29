@@ -122,7 +122,7 @@ const Diary = () => {
 
             // Note: For real encryption, use a library like crypto-js.
             // Here we use the 'aiAccessEnabled' flag to control visibility to the AI.
-            
+
             await addDoc(collection(db, "diary"), {
                 userId: user.uid,
                 content: entry,
@@ -173,26 +173,24 @@ const Diary = () => {
     return (
         <div className="min-h-screen bg-background pb-20 diary-container">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
-                
+
                 {/* Tab Navigation */}
                 <div className="flex justify-center mb-8 gap-4">
-                    <button 
+                    <button
                         onClick={() => setActiveTab("write")}
-                        className={`px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 ${
-                            activeTab === "write" 
-                            ? "bg-primary text-primary-foreground shadow-lg scale-105" 
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
-                        }`}
+                        className={`px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 ${activeTab === "write"
+                                ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                            }`}
                     >
                         ✍️ Relax & Write
                     </button>
-                    <button 
+                    <button
                         onClick={() => setActiveTab("read")}
-                        className={`px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 ${
-                            activeTab === "read" 
-                            ? "bg-primary text-primary-foreground shadow-lg scale-105" 
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
-                        }`}
+                        className={`px - 8 py - 3 rounded - full text - lg font - medium transition - all duration - 300 ${activeTab === "read"
+                                ? "bg-primary text-primary-foreground shadow-lg scale-105"
+                                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                            } `}
                     >
                         📖 Read Memories
                     </button>
@@ -204,7 +202,7 @@ const Diary = () => {
                         <div className="bg-card rounded-3xl shadow-xl border border-border p-8 min-h-[600px] flex flex-col relative overflow-hidden">
                             {/* Relaxing Background Element */}
                             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400"></div>
-                            
+
                             <div className="flex items-center justify-between mb-8">
                                 <div>
                                     <h2 className="text-3xl font-bold text-foreground">
@@ -214,7 +212,7 @@ const Diary = () => {
                                         {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                     </p>
                                 </div>
-                                
+
                                 {/* AI Access Toggle (Compact) */}
                                 <div className="flex items-center gap-3 bg-muted/30 px-4 py-2 rounded-full border border-border">
                                     <span className="text-xs font-medium text-muted-foreground">
@@ -222,9 +220,9 @@ const Diary = () => {
                                     </span>
                                     <button
                                         onClick={toggleAiAccess}
-                                        className={`w-10 h-5 rounded-full p-0.5 transition-colors duration-300 ${aiAccessEnabled ? 'bg-green-500' : 'bg-gray-300'}`}
+                                        className={`w - 10 h - 5 rounded - full p - 0.5 transition - colors duration - 300 ${aiAccessEnabled ? 'bg-green-500' : 'bg-gray-300'} `}
                                     >
-                                        <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${aiAccessEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                                        <div className={`w - 4 h - 4 bg - white rounded - full shadow - sm transform transition - transform duration - 300 ${aiAccessEnabled ? 'translate-x-5' : 'translate-x-0'} `}></div>
                                     </button>
                                 </div>
                             </div>
@@ -238,11 +236,11 @@ const Diary = () => {
                                     className="flex-1 w-full p-6 rounded-2xl border-none bg-muted/20 focus:bg-muted/30 focus:ring-0 outline-none transition-all resize-none text-lg leading-relaxed placeholder:text-muted-foreground/50"
                                     style={{ minHeight: '300px' }}
                                 />
-                                
+
                                 <div className="mt-6 flex justify-between items-center">
                                     <p className="text-xs text-muted-foreground italic">
-                                        {aiAccessEnabled 
-                                            ? "ℹ️ AI can read this to help you." 
+                                        {aiAccessEnabled
+                                            ? "ℹ️ AI can read this to help you."
                                             : "🔒 Encrypted & Private. AI cannot see this."}
                                     </p>
                                     <button
@@ -312,8 +310,8 @@ const Diary = () => {
 
                                 {/* Navigation Controls */}
                                 <div className="absolute -bottom-16 flex gap-8">
-                                    <button 
-                                        onClick={prevPage} 
+                                    <button
+                                        onClick={prevPage}
                                         disabled={currentPage === 0}
                                         className="px-6 py-2 bg-white rounded-full shadow-md hover:bg-gray-50 disabled:opacity-50 transition-all"
                                     >
@@ -322,8 +320,8 @@ const Diary = () => {
                                     <span className="py-2 text-muted-foreground font-serif">
                                         Page {currentPage + 1} of {entries.length}
                                     </span>
-                                    <button 
-                                        onClick={nextPage} 
+                                    <button
+                                        onClick={nextPage}
                                         disabled={currentPage >= entries.length - 1}
                                         className="px-6 py-2 bg-white rounded-full shadow-md hover:bg-gray-50 disabled:opacity-50 transition-all"
                                     >

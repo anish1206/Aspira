@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import ReactMarkdown from 'react-markdown';
 import ChatLayout from "../components/ChatLayout";
 import InteractiveBranch2 from "../components/InteractiveBranches2";
 import { db, auth } from "../firebase";
@@ -413,7 +414,26 @@ const Chat = () => {
                                             : 'bg-card border border-border text-card-foreground rounded-bl-sm'
                                             }`}
                                     >
-                                        {msg.text}
+                                        <ReactMarkdown
+                                            className="markdown-content"
+                                            components={{
+                                                p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                                                strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                                em: ({node, ...props}) => <em className="italic" {...props} />,
+                                                ul: ({node, ...props}) => <ul className="list-disc list-inside mb-2 space-y-1" {...props} />,
+                                                ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-2 space-y-1" {...props} />,
+                                                li: ({node, ...props}) => <li className="ml-2" {...props} />,
+                                                code: ({node, inline, ...props}) => 
+                                                    inline 
+                                                        ? <code className="bg-muted px-1.5 py-0.5 rounded text-sm" {...props} />
+                                                        : <code className="block bg-muted p-2 rounded my-2 text-sm" {...props} />,
+                                                h1: ({node, ...props}) => <h1 className="text-xl font-bold mb-2" {...props} />,
+                                                h2: ({node, ...props}) => <h2 className="text-lg font-bold mb-2" {...props} />,
+                                                h3: ({node, ...props}) => <h3 className="text-base font-bold mb-1" {...props} />,
+                                            }}
+                                        >
+                                            {msg.text}
+                                        </ReactMarkdown>
                                     </div>
                                     {msg.role === 'user' && (
                                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex-shrink-0 flex items-center justify-center mt-1 text-white text-xs font-bold">

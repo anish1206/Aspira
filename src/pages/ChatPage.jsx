@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import ChatInput from '../components/ChatInput';
 import { speak } from '../tts';
 import { auth } from '../firebase'; // Importing auth to get userId if needed
@@ -65,7 +66,23 @@ const ChatPage = () => {
                         backgroundColor: log.role === 'user' ? '#e3f2fd' : (log.role === 'error' ? '#ffebee' : '#f5f5f5'),
                     }}>
                         <div style={styles.logRole}>{log.role} <span style={styles.timestamp}>{log.timestamp}</span></div>
-                        <div>{log.text}</div>
+                        <div>
+                            <ReactMarkdown
+                                components={{
+                                    p: ({node, ...props}) => <p style={{marginBottom: '8px'}} {...props} />,
+                                    strong: ({node, ...props}) => <strong style={{fontWeight: 'bold'}} {...props} />,
+                                    em: ({node, ...props}) => <em style={{fontStyle: 'italic'}} {...props} />,
+                                    ul: ({node, ...props}) => <ul style={{listStyle: 'disc', paddingLeft: '20px', marginBottom: '8px'}} {...props} />,
+                                    ol: ({node, ...props}) => <ol style={{listStyle: 'decimal', paddingLeft: '20px', marginBottom: '8px'}} {...props} />,
+                                    code: ({node, inline, ...props}) => 
+                                        inline 
+                                            ? <code style={{backgroundColor: '#e0e0e0', padding: '2px 6px', borderRadius: '3px', fontSize: '0.9em'}} {...props} />
+                                            : <code style={{display: 'block', backgroundColor: '#e0e0e0', padding: '8px', borderRadius: '5px', margin: '8px 0', fontSize: '0.9em'}} {...props} />,
+                                }}
+                            >
+                                {log.text}
+                            </ReactMarkdown>
+                        </div>
                     </div>
                 ))}
             </div>

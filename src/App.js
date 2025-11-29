@@ -30,7 +30,7 @@ const Nav = () => {
         { to: '/groups', label: 'Groups' },
         // { to: '/mindscape', label: 'Creative Therapy' },
         // { to: '/mentors', label: 'Mentors' },
-        { to: '/diary', label: 'Diary' },
+        { to: '/diary', label: 'Personalized Diary' },
         { to: '/settings', label: 'Settings' },
     ];
 
@@ -164,7 +164,7 @@ function App() {
             <div>
                 <Routes>
                     <Route path="/" element={<Landing />} />
-                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    <Route path="/dashboard" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
                     <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
                     <Route path="/groups" element={<ProtectedRoute><GroupListPage /></ProtectedRoute>} />
                     <Route path="/groups/:groupId" element={<ProtectedRoute><ChatRoomPage /></ProtectedRoute>} />

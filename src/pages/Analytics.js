@@ -1,6 +1,7 @@
 // src/pages/Analytics.js
 import React from "react";
 import { motion } from "framer-motion";
+import InteractiveBranch from "../components/InteractiveBranch";
 
 // --- Mock Data ---
 const activityData = Array.from({ length: 365 }, (_, i) => ({
@@ -298,7 +299,7 @@ const AIInsightsPanel = () => (
                 </svg>
             </div>
             <div>
-                <h3 className="text-lg font-semibold text-gray-800">AI Companion Insights</h3>
+                <h3 className="text-2xl font-semibold text-gray-800">Hi, Anish</h3>
                 <p className="text-xs text-gray-500">Based on your recent conversations</p>
             </div>
         </div>
@@ -341,6 +342,11 @@ const AIInsightsPanel = () => (
 export default function Analytics() {
     return (
         <div className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-gradient-to-b from-green-200 to-green-50">
+            {/* Interactive Branch Background */}
+            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+                <InteractiveBranch />
+            </div>
+
             {/* Background Elements (Non-interactive) */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <svg className="absolute top-0 left-0 w-full h-full opacity-[0.03]" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -355,7 +361,7 @@ export default function Analytics() {
             {/* Content */}
             <div className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-24">
                 <div className="mb-10">
-                    <h1 className="text-3xl md:text-4xl font-light text-gray-900 mb-2">
+                    <h1 className="text-4xl md:text-5xl font-light text-gray-900 mb-2">
                         Wellness <span className="font-semibold text-green-900">Analytics</span>
                     </h1>
                     <p className="text-gray-600">Insights into your mental health journey</p>
