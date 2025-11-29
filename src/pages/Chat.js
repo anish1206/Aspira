@@ -13,6 +13,8 @@ import {
     updateDoc,
     deleteDoc
 } from "firebase/firestore";
+import useSpeechToText from "../SpeechRecognition";
+import { speak } from "../tts";
 
 const Chat = () => {
     // State
@@ -25,6 +27,8 @@ const Chat = () => {
     const [selectedMood, setSelectedMood] = useState("Friendly");
     const [editingSessionId, setEditingSessionId] = useState(null);
     const [editingTitle, setEditingTitle] = useState("");
+
+    const { isListening, startListening, stopListening } = useSpeechToText();
 
     const chatContainerRef = useRef(null);
     const inputRef = useRef(null);
@@ -149,8 +153,10 @@ const Chat = () => {
         }
     };
 
-    const handleSend = async () => {
-        if (newMessage.trim() === "" || loading) return;
+    const handleSend = async (manualText = null) => {
+        const textToSend = typeof manualText === 'string' ? manualText : newMessage;
+
+        if (textToSend.trim() === "" || loading) return;
 
         const user = auth.currentUser;
         if (!user) {
@@ -158,7 +164,7 @@ const Chat = () => {
             return;
         }
 
-        const userText = newMessage.trim();
+        const userText = textToSend.trim();
         setNewMessage("");
         setLoading(true);
 
@@ -213,6 +219,9 @@ const Chat = () => {
                 createdAt: serverTimestamp()
             });
 
+            // Speak the response
+            speak(data.text);
+
             // Update session timestamp again
             await updateDoc(doc(db, "chats", user.uid, "sessions", sessionId), {
                 updatedAt: serverTimestamp()
@@ -229,6 +238,17 @@ const Chat = () => {
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleMicToggle = () => {
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening((text) => {
+                setNewMessage(text);
+                handleSend(text);
+            });
         }
     };
 
@@ -421,17 +441,27 @@ const Chat = () => {
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                             placeholder="Message Aspira..."
-                            className="w-full rounded-2xl py-4 pl-5 pr-14 bg-muted/50 border-transparent focus:bg-background border focus:border-primary/20 shadow-sm focus:shadow-md outline-none transition-all text-base placeholder:text-muted-foreground hover:shadow-[0_0_15px_rgba(22,163,74,0.3)] hover:border-green-600/40"
+                            className="w-full rounded-2xl py-4 pl-5 pr-24 bg-muted/50 border-transparent focus:bg-background border focus:border-primary/20 shadow-sm focus:shadow-md outline-none transition-all text-base placeholder:text-muted-foreground hover:shadow-[0_0_15px_rgba(22,163,74,0.3)] hover:border-green-600/40"
                             disabled={loading}
                         />
-                        <button
-                            onClick={handleSend}
-                            disabled={loading || !newMessage.trim()}
-                            className="absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-xl bg-green-900 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all active:scale-95"
-                            aria-label="Send"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-                        </button>
+                        <div className="absolute top-1/2 -translate-y-1/2 right-2 flex gap-1">
+                            <button
+                                onClick={handleMicToggle}
+                                className={`p-2 rounded-xl transition-all active:scale-95 ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+                                aria-label="Toggle Microphone"
+                                title="Toggle Microphone"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></svg>
+                            </button>
+                            <button
+                                onClick={() => handleSend()}
+                                disabled={loading || !newMessage.trim()}
+                                className="p-2 rounded-xl bg-green-900 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all active:scale-95"
+                                aria-label="Send"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                            </button>
+                        </div>
                     </div>
                     <div className="text-center mt-2">
                         <p className="text-[10px] text-muted-foreground">Aspira can make mistakes. Consider checking important information.</p>
