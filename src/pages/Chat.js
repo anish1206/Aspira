@@ -28,10 +28,17 @@ const Chat = () => {
     const [editingSessionId, setEditingSessionId] = useState(null);
     const [editingTitle, setEditingTitle] = useState("");
 
-    const { isListening, startListening, stopListening } = useSpeechToText();
+    const { isListening, startListening, stopListening, error: sttError } = useSpeechToText();
 
     const chatContainerRef = useRef(null);
     const inputRef = useRef(null);
+
+    // Error handling for STT
+    useEffect(() => {
+        if (sttError) {
+            alert(sttError);
+        }
+    }, [sttError]);
 
     // 1. Listen for User's Sessions (Sidebar)
     useEffect(() => {

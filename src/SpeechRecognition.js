@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 const useSpeechToText = () => {
     const [isListening, setIsListening] = useState(false);
+    const [error, setError] = useState(null);
     const recognitionRef = useRef(null);
 
     useEffect(() => {
@@ -14,12 +15,15 @@ const useSpeechToText = () => {
             recognitionRef.current.continuous = false;
         } else {
             console.warn("Speech Recognition API not supported in this browser.");
+            setError("Speech Recognition API not supported in this browser.");
         }
     }, []);
 
     const startListening = useCallback((callback) => {
+        setError(null);
         if (!recognitionRef.current) {
             console.error("Speech Recognition not supported");
+            setError("Speech Recognition not supported");
             return;
         }
 
@@ -33,6 +37,13 @@ const useSpeechToText = () => {
 
         recognitionRef.current.onerror = (event) => {
             console.error("Speech recognition error", event.error);
+            if (event.error === 'not-allowed') {
+                setError("Microphone access denied. Please allow microphone permissions.");
+            } else if (event.error === 'no-speech') {
+                // Ignore no-speech error as it just means silence
+            } else {
+                setError(`Speech recognition error: ${event.error}`);
+            }
             setIsListening(false);
         };
 
@@ -45,6 +56,7 @@ const useSpeechToText = () => {
             setIsListening(true);
         } catch (e) {
             console.error("Failed to start speech recognition:", e);
+            setError("Failed to start speech recognition.");
             setIsListening(false);
         }
     }, [isListening]);
@@ -56,7 +68,7 @@ const useSpeechToText = () => {
         }
     }, [isListening]);
 
-    return { isListening, startListening, stopListening };
+    return { isListening, startListening, stopListening, error };
 };
 
 export default useSpeechToText;
