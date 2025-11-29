@@ -4,14 +4,7 @@ const { initializeApp, cert, getApps } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const twilio = require("twilio");
 
-// Initialize Firebase Admin if not already initialized
-if (!getApps().length) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-    initializeApp({
-        credential: cert(serviceAccount)
-    });
-}
-
+// Get Firestore instance (Firebase Admin already initialized in askGemini.js)
 const db = getFirestore();
 
 // CORS Configuration - same as askGemini.js

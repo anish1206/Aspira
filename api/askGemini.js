@@ -21,6 +21,7 @@ const allowedOrigins = new Set([
     'https://genai2505.firebaseapp.com',
     'http://localhost:3000',
     'https://mindsync.vercel.app',
+    'https://mindsync-web.vercel.app',
     'https://mindsync-6p3xfn6ko-anishs-projects-799e04e9.vercel.app',
     'https://mindsync-majg12jao-anishs-projects-799e04e9.vercel.app',
 ]);
@@ -223,4 +224,3 @@ Keep replies structured and thoughtful. Guide them to their own insights through
         return response.status(500).json({ message: "Failed to get a response from the AI.", error: error.message });
     }
 }
-```
